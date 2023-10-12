@@ -11,27 +11,4 @@ import java.util.List;
 @Service
 public class UserService {
 
-  private final UserRepository userRepository;
-
-  public List<User> getAllParticipants() {
-    return userRepository.findAll();
-  }
-
-  public User getParticipantById(Long id) {
-    return userRepository.findById(id).orElse(null);
-  }
-
-  public User createParticipant(User user) {
-    return userRepository.save(user);
-  }
-
-  public void deleteParticipant(Long id) {
-    userRepository.deleteById(id);
-  }
-
-  public List<User> getParticipantsByTripId(Long tripId) {
-    return userRepository.getUsersByTripId(tripId);
-  }
-
-
 }

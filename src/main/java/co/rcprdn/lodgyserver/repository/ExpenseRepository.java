@@ -8,8 +8,5 @@ import java.util.List;
 
 @Repository
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
-  
-  List<Expense> getExpensesByTripId(Long tripId);
 
-  List<Expense> getExpensesByParticipantIdAndTripId(Long participantId, Long tripId);
 }
