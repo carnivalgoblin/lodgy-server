@@ -32,6 +32,6 @@ public class Trip {
     joinColumns = @JoinColumn(name = "trip_id"),
     inverseJoinColumns = @JoinColumn(name = "participant_id")
   )
-  private List<Participant> participants;
+  private List<User> users;
 
 }

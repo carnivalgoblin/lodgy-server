@@ -2,11 +2,11 @@ version: '3'
 services:
   postgres:
     image: postgres:latest
-    container_name: my_postgres_db
+    container_name: lodgy-db
     environment:
-      POSTGRES_USER: your_username
-      POSTGRES_PASSWORD: your_password
-      POSTGRES_DB: your_database
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pg78hhu00ß078
+      POSTGRES_DB: lodgy_db
     ports:
       - "5432:5432"
     volumes:

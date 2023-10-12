@@ -45,6 +45,10 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>
@@ -57,19 +61,24 @@
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
-            <version>0.11.2</version> <!-- Verwenden Sie die neueste Version -->
+            <version>0.11.5</version> <!-- Verwenden Sie die neueste Version -->
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-impl</artifactId>
-            <version>0.11.2</version> <!-- Verwenden Sie die neueste Version -->
+            <version>0.11.5</version> <!-- Verwenden Sie die neueste Version -->
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-jackson</artifactId>
-            <version>0.11.2</version> <!-- Verwenden Sie die neueste Version -->
+            <version>0.11.5</version> <!-- Verwenden Sie die neueste Version -->
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+            <version>3.1.2</version>
         </dependency>
     </dependencies>
 

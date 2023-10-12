@@ -24,7 +24,7 @@ public class Expense {
 
   @ManyToOne
   @JoinColumn(name = "participant_id")
-  private Participant participant;
+  private User user;
 
   @ManyToOne
   @JoinColumn(name = "trip_id")
