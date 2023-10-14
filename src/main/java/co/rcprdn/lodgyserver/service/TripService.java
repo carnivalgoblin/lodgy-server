@@ -11,4 +11,30 @@ import java.util.List;
 @Service
 public class TripService {
 
+  private final TripRepository tripRepository;
+
+  public List<Trip> getAllTrips() {
+    return tripRepository.findAll();
+  }
+
+  public Trip getTripById(Long id) {
+    return tripRepository.findById(id).orElseThrow(() -> new RuntimeException("Trip not found"));
+  }
+
+  public Trip createTrip(Trip trip) {
+    return tripRepository.save(trip);
+  }
+
+  public Trip updateTrip(Trip trip) {
+    return tripRepository.save(trip);
+  }
+
+  public void deleteTrip(Long id) {
+    tripRepository.deleteById(id);
+  }
+
+  public List<Trip> getTripsByUserId(Long userId) {
+    return tripRepository.findByUserId(userId);
+  }
+
 }

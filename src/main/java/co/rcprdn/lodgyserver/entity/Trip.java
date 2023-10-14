@@ -26,12 +26,5 @@ public class Trip {
 
   private String endDate;
 
-  @ManyToMany
-  @JoinTable(
-    name = "trip_participant",
-    joinColumns = @JoinColumn(name = "trip_id"),
-    inverseJoinColumns = @JoinColumn(name = "participant_id")
-  )
-  private List<User> users;
 
 }

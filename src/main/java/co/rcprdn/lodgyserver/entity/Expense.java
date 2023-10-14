@@ -22,12 +22,5 @@ public class Expense {
 
   private Double amount;
 
-  @ManyToOne
-  @JoinColumn(name = "participant_id")
-  private User user;
-
-  @ManyToOne
-  @JoinColumn(name = "trip_id")
-  private Trip trip;
 
 }
