@@ -33,16 +33,4 @@ public class ExpenseService {
     expenseRepository.deleteById(id);
   }
 
-  public List<Expense> getExpensesByTripId(Long tripId) {
-    return expenseRepository.findByTripId(tripId);
-  }
-
-  public List<Expense> getExpensesByUserId(Long userId) {
-    return expenseRepository.findByUserId(userId);
-  }
-
-  public List<Expense> getExpensesByTripIdAndUserId(Long tripId, Long userId) {
-    return expenseRepository.findByTripIdAndUserId(tripId, userId);
-  }
-
 }

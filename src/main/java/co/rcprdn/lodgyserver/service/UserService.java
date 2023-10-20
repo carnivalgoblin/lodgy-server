@@ -16,7 +16,6 @@ import java.util.List;
 public class UserService {
 
   private final UserRepository userRepository;
-  private final TripRepository tripRepository;
 
   public List<User> getAllUsers() {
     return userRepository.findAll();
@@ -25,7 +24,6 @@ public class UserService {
   public User getUserById(Long id) {
     return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
   }
-
 
   public User updateUser(User user) {
     return userRepository.save(user);
@@ -46,9 +44,5 @@ public class UserService {
   public Boolean existsByEmail(String email) {
     return userRepository.existsByEmail(email);
   }
-
-
-
-
 
 }

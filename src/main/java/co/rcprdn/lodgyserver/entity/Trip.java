@@ -6,13 +6,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
+import java.util.*;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
 @Getter
-
 @Entity
 public class Trip {
 
@@ -22,9 +21,19 @@ public class Trip {
 
   private String destination;
 
-  private String startDate;
+  private Date startDate;
 
-  private String endDate;
+  private Date endDate;
 
+  private String description;
+
+  @ManyToMany(mappedBy = "trips", cascade = CascadeType.MERGE)
+  private Set<User> users = new HashSet<>();
+
+  @OneToMany(mappedBy = "trip")
+  private List<Expense> expenses;
+
+  @OneToMany(mappedBy = "trip")
+  private List<TripNights> nights = new ArrayList<>();
 
 }

@@ -4,6 +4,7 @@ import co.rcprdn.lodgyserver.entity.Trip;
 import co.rcprdn.lodgyserver.repository.TripRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -25,16 +26,13 @@ public class TripService {
     return tripRepository.save(trip);
   }
 
+  @Transactional
   public Trip updateTrip(Trip trip) {
     return tripRepository.save(trip);
   }
 
   public void deleteTrip(Long id) {
     tripRepository.deleteById(id);
-  }
-
-  public List<Trip> getTripsByUserId(Long userId) {
-    return tripRepository.findByUserId(userId);
   }
 
 }

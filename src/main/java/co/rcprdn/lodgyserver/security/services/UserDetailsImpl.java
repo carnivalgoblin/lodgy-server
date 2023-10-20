@@ -2,6 +2,7 @@ package co.rcprdn.lodgyserver.security.services;
 
 import co.rcprdn.lodgyserver.entity.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,6 +21,9 @@ public class UserDetailsImpl implements UserDetails {
     private final String username;
 
     private final String email;
+
+    @Getter
+    private User user;
 
     @JsonIgnore
     private final String password;
@@ -40,12 +44,16 @@ public class UserDetailsImpl implements UserDetails {
                 .map(role -> new SimpleGrantedAuthority(role.getName().name()))
                 .collect(Collectors.toList());
 
-        return new UserDetailsImpl(
+        UserDetailsImpl userDetails = new UserDetailsImpl(
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
                 user.getPassword(),
                 authorities);
+
+        userDetails.user = user;
+
+        return userDetails;
     }
 
     @Override
@@ -100,5 +108,6 @@ public class UserDetailsImpl implements UserDetails {
         UserDetailsImpl user = (UserDetailsImpl) o;
         return Objects.equals(id, user.id);
     }
+
 }
 

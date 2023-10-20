@@ -1,11 +1,12 @@
 package co.rcprdn.lodgyserver.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.Date;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -13,23 +14,20 @@ import lombok.Setter;
 @Getter
 
 @Entity
-public class Expense {
+public class TripNights {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  private String description;
-
-  @NotNull
-  private Double amount;
-
   @ManyToOne
-  @JoinColumn(name = "user_id")
   private User user;
 
-  @ManyToOne
-  @JoinColumn(name = "trip_id")
+  @ManyToOne()
   private Trip trip;
+
+  private Date startDate;
+  private Date endDate;
+  private int numberOfNights;
 
 }

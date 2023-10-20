@@ -1,16 +1,21 @@
 package co.rcprdn.lodgyserver.controller;
 
 
+import co.rcprdn.lodgyserver.entity.Expense;
+import co.rcprdn.lodgyserver.entity.Trip;
 import co.rcprdn.lodgyserver.entity.User;
 import co.rcprdn.lodgyserver.security.services.UserDetailsImpl;
 import co.rcprdn.lodgyserver.service.UserService;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,15 +28,8 @@ public class UserController {
 
   public final UserService userService;
 
-  private final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-  private final UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-  List<String> roles = userDetails.getAuthorities().stream()
-          .map(item -> item.getAuthority())
-          .collect(Collectors.toList());
-
   @GetMapping("/all")
-  @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
+  @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
   public List<User> getAllUsers() {
     return userService.getAllUsers();
   }
@@ -40,62 +38,114 @@ public class UserController {
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
   public User getUserById(@PathVariable("userId") long userId) {
 
-    // TODO: change to ResponseEntity
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-    if (hasUserRole("USER", authentication)) {
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+    if (hasUserRole("MODERATOR", authentication) || hasUserRole("ADMIN", authentication)) {
+      return userService.getUserById(userId);
+
+    } else if (hasUserRole("USER", authentication)) {
       if (userDetails.getId().equals(userId)) {
         return userService.getUserById(userId);
       } else {
-        // TODO: return error message
-        System.out.println("You are not authorized to access this resource or it does not exist.");
+        throw AuthenticationException.class.cast(HttpStatus.UNAUTHORIZED);
       }
-
-    } else if (hasUserRole("MODERATOR", authentication) || hasUserRole("ADMIN", authentication)) {
-      return userService.getUserById(userId);
+    } else {
+      throw AuthenticationException.class.cast(HttpStatus.NOT_FOUND);
     }
-
-    return null;
   }
 
-  @GetMapping("/username/{username}")
+  @PostMapping("/update")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-  public User getUserByUsername(@PathVariable("username") String username) {
+  public User updateUser(@RequestBody User user) {
 
-    Long userId = userService.getUserByUsername(username).getId();
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-    if (hasUserRole("USER", authentication)) {
-      if (userDetails.getId().equals(userId)) {
-        return userService.getUserByUsername(username);
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+    if (hasUserRole("ADMIN", authentication)) {
+      return userService.updateUser(user);
+    } else if (hasUserRole("MODERATOR", authentication)) {
+      user.setRoles(userService.getUserById(user.getId()).getRoles());
+      return userService.updateUser(user);
+    } else if (hasUserRole("USER", authentication)) {
+      if (userDetails.getId().equals(user.getId())) {
+        user.setRoles(userService.getUserById(user.getId()).getRoles());
+        return userService.updateUser(user);
       } else {
-        // TODO: return error message
-        System.out.println("You are not authorized to access this resource or it does not exist.");
+        throw new AccessDeniedException("You are not authorized to access this resource.");
       }
-    } else if (hasUserRole("MODERATOR", authentication) || hasUserRole("ADMIN", authentication)) {
-      return userService.getUserByUsername(username);
+    } else {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Resource not found.");
     }
-
-    return null;
   }
 
   @DeleteMapping("/{userId}")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-  public HttpStatus deleteUserById(@PathVariable("userId") long userId) {
+  public void deleteUser(@PathVariable("userId") long userId) {
 
-    if (hasUserRole("USER", authentication)) {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+    if (hasUserRole("ADMIN", authentication)) {
+      userService.deleteUser(userId);
+    } else if (hasUserRole("MODERATOR", authentication) || hasUserRole("USER", authentication)) {
       if (userDetails.getId().equals(userId)) {
         userService.deleteUser(userId);
-        return HttpStatus.OK;
-      }  else {
-        // TODO: return error message
-        System.out.println("You are not authorized to access this resource or it does not exist.");
+      } else {
+        throw new AccessDeniedException("You are not authorized to access this resource.");
       }
-    } else if (hasUserRole("MODERATOR", authentication) || hasUserRole("ADMIN", authentication)) {
-      userService.deleteUser(userId);
-      return HttpStatus.OK;
+    } else {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Resource not found.");
     }
-
-    return HttpStatus.NOT_FOUND;
   }
+
+  @GetMapping("/{userId}/trips")
+  @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+  public List<Trip> getTripsByUserId(@PathVariable("userId") long userId) {
+
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+    if (hasUserRole("MODERATOR", authentication) || hasUserRole("ADMIN", authentication)) {
+      return (List<Trip>) userService.getUserById(userId).getTrips();
+
+    } else if (hasUserRole("USER", authentication)) {
+      if (userDetails.getId().equals(userId)) {
+        return (List<Trip>) userService.getUserById(userId).getTrips();
+      } else {
+        throw new AccessDeniedException("You are not authorized to access this resource.");
+      }
+    } else {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Resource not found.");
+    }
+  }
+
+  @GetMapping("/{userId}/expenses")
+  @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+  public List<Expense> getExpensesByUserId(@PathVariable("userId") long userId) {
+
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+    if (hasUserRole("MODERATOR", authentication) || hasUserRole("ADMIN", authentication)) {
+      return userService.getUserById(userId).getExpenses();
+
+    } else if (hasUserRole("USER", authentication)) {
+      if (userDetails.getId().equals(userId)) {
+        return userService.getUserById(userId).getExpenses();
+      } else {
+        throw new AccessDeniedException("You are not authorized to access this resource.");
+      }
+    } else {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Resource not found.");
+    }
+  }
+
 
   private boolean hasUserRole(String roleName, Authentication authentication) {
     return authentication.getAuthorities().stream()

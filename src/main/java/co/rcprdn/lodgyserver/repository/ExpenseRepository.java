@@ -9,9 +9,9 @@ import java.util.List;
 @Repository
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
-  List<Expense> findByTripId(Long tripId);
-
-  List<Expense> findByTripIdAndUserId(Long tripId, Long userId);
-
-  List<Expense> findByUserId(Long userId);
+//  List<Expense> findByTripId(Long tripId);
+//
+//  List<Expense> findByTripIdAndUserId(Long tripId, Long userId);
+//
+//  List<Expense> findByUserId(Long userId);
 }

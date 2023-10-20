@@ -1,22 +1,17 @@
 package co.rcprdn.lodgyserver.entity;
 
 import jakarta.persistence.*;
-
-import java.util.HashSet;
-import java.util.Set;
-
-import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.List;
-
+import java.util.Set;
 
 @Entity
 @Table(name = "users",
@@ -59,12 +54,13 @@ public class User {
     this.password = password;
   }
 
+  @OneToMany(mappedBy = "user")
+  private List<Expense> expenses;
 
-//
-//  @OneToMany(mappedBy = "participant")
-//  private List<Expense> expenses;
-//
-//  @ManyToMany(mappedBy = "participants")
-//  private List<Trip> trips;
+  @ManyToMany
+  @JoinTable(name = "user_trips",
+          joinColumns = @JoinColumn(name = "user_id"),
+          inverseJoinColumns = @JoinColumn(name = "trip_id"))
+  private Set<Trip> trips = new HashSet<>();
 
 }
