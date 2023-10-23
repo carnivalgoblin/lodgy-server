@@ -6,28 +6,29 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Date;
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
 @Getter
-
 @Entity
-public class TripNights {
+@Table(name = "user_trips")
+
+public class UserTripExpense {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
   @ManyToOne
+  @JoinColumn(name = "user_id")
   private User user;
 
-  @ManyToOne()
+  @ManyToOne
+  @JoinColumn(name = "trip_id")
   private Trip trip;
 
-  private Date startDate;
-  private Date endDate;
-  private int numberOfNights;
+  @ManyToOne
+  @JoinColumn(name = "expense_id")
+  private Expense expense;
 
 }

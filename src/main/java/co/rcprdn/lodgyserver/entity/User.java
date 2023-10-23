@@ -9,9 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "users",
@@ -48,19 +46,22 @@ public class User {
           inverseJoinColumns = @JoinColumn(name = "role_id"))
   private Set<Role> roles = new HashSet<>();
 
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+  private List<UserTripExpense> userTripExpenses = new ArrayList<>();
+
+//  @OneToMany(mappedBy = "user")
+//  private List<Expense> expenses;
+//
+//  @ManyToMany(cascade = CascadeType.ALL)
+//  @JoinTable(name = "user_trips",
+//          joinColumns = @JoinColumn(name = "user_id"),
+//          inverseJoinColumns = @JoinColumn(name = "trip_id"))
+//  private List<Trip> trips = new ArrayList<>();
+
   public User(String username, String email, String password) {
     this.username = username;
     this.email = email;
     this.password = password;
   }
-
-  @OneToMany(mappedBy = "user")
-  private List<Expense> expenses;
-
-  @ManyToMany
-  @JoinTable(name = "user_trips",
-          joinColumns = @JoinColumn(name = "user_id"),
-          inverseJoinColumns = @JoinColumn(name = "trip_id"))
-  private Set<Trip> trips = new HashSet<>();
 
 }

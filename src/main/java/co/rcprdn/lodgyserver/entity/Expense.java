@@ -11,7 +11,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @Setter
 @Getter
-
 @Entity
 public class Expense {
 
@@ -28,8 +27,5 @@ public class Expense {
   @JoinColumn(name = "user_id")
   private User user;
 
-  @ManyToOne
-  @JoinColumn(name = "trip_id")
-  private Trip trip;
 
 }

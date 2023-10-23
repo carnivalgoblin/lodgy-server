@@ -13,6 +13,7 @@ import java.util.*;
 @Setter
 @Getter
 @Entity
+@Table(name = "trips")
 public class Trip {
 
   @Id
@@ -27,13 +28,7 @@ public class Trip {
 
   private String description;
 
-  @ManyToMany(mappedBy = "trips", cascade = CascadeType.MERGE)
-  private Set<User> users = new HashSet<>();
-
-  @OneToMany(mappedBy = "trip")
-  private List<Expense> expenses;
-
-  @OneToMany(mappedBy = "trip")
-  private List<TripNights> nights = new ArrayList<>();
+  @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL)
+  private List<UserTripExpense> userTripExpenses = new ArrayList<>();
 
 }
