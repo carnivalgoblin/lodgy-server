@@ -23,9 +23,12 @@ public class Expense {
   @NotNull
   private Double amount;
 
-  @ManyToOne
-  @JoinColumn(name = "user_id")
-  private User user;
+//  @ManyToOne
+//  @JoinColumn(name = "user_id")
+//  private User user;
 
+  @ManyToOne
+  @JoinColumn(name = "trip_id")
+  private Trip trip;
 
 }

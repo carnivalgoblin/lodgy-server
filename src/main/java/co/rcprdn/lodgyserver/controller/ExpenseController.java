@@ -34,18 +34,20 @@ public class ExpenseController {
 
     Expense expense = expenseService.getExpenseById(expenseId);
 
-    if (hasUserRole("MODERATOR", authentication) || hasUserRole("ADMIN", authentication)) {
-      return ResponseEntity.ok(expense);
+    return ResponseEntity.ok(expense);
 
-    } else if (hasUserRole("USER", authentication)) {
-      if (userDetails.getId().equals(expense.getUser().getId())) {
-        return ResponseEntity.ok(expense);
-      } else {
-        throw new AccessDeniedException("You are not authorized to access this resource.");
-      }
-    } else {
-      throw new AccessDeniedException("You are not authorized to access this resource.");
-    }
+//    if (hasUserRole("MODERATOR", authentication) || hasUserRole("ADMIN", authentication)) {
+//      return ResponseEntity.ok(expense);
+//
+//    } else if (hasUserRole("USER", authentication)) {
+//      if (userDetails.getId().equals(expense.getUser().getId())) {
+//        return ResponseEntity.ok(expense);
+//      } else {
+//        throw new AccessDeniedException("You are not authorized to access this resource.");
+//      }
+//    } else {
+//      throw new AccessDeniedException("You are not authorized to access this resource.");
+//    }
   }
 
   @PostMapping("/create")
@@ -56,18 +58,20 @@ public class ExpenseController {
 
     UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-    if (hasUserRole("MODERATOR", authentication) || hasUserRole("ADMIN", authentication)) {
-      return ResponseEntity.ok(expenseService.createExpense(expense));
+    return ResponseEntity.ok(expenseService.createExpense(expense));
 
-    } else if (hasUserRole("USER", authentication)) {
-      if (userDetails.getId().equals(expense.getUser().getId())) {
-        return ResponseEntity.ok(expenseService.createExpense(expense));
-      } else {
-        throw new AccessDeniedException("You are not authorized to create this resource.");
-      }
-    } else {
-      throw new AccessDeniedException("You are not authorized to access this resource.");
-    }
+//    if (hasUserRole("MODERATOR", authentication) || hasUserRole("ADMIN", authentication)) {
+//      return ResponseEntity.ok(expenseService.createExpense(expense));
+//
+//    } else if (hasUserRole("USER", authentication)) {
+//      if (userDetails.getId().equals(expense.getUser().getId())) {
+//        return ResponseEntity.ok(expenseService.createExpense(expense));
+//      } else {
+//        throw new AccessDeniedException("You are not authorized to create this resource.");
+//      }
+//    } else {
+//      throw new AccessDeniedException("You are not authorized to access this resource.");
+//    }
   }
 
   @DeleteMapping("/delete/{id}")
@@ -78,19 +82,21 @@ public class ExpenseController {
 
     UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-    if (hasUserRole("MODERATOR", authentication) || hasUserRole("ADMIN", authentication)) {
-      expenseService.deleteExpense(id);
-      return ResponseEntity.ok().build();
-    } else if (hasUserRole("USER", authentication)) {
-      if (userDetails.getId().equals(expenseService.getExpenseById(id).getUser().getId())) {
-        expenseService.deleteExpense(id);
-        return ResponseEntity.ok().build();
-      } else {
-        throw new AccessDeniedException("You are not authorized to access this resource.");
-      }
-    } else {
-      throw new AccessDeniedException("You are not authorized to access this resource.");
-    }
+    return null;
+
+//    if (hasUserRole("MODERATOR", authentication) || hasUserRole("ADMIN", authentication)) {
+//      expenseService.deleteExpense(id);
+//      return ResponseEntity.ok().build();
+//    } else if (hasUserRole("USER", authentication)) {
+//      if (userDetails.getId().equals(expenseService.getExpenseById(id).getUser().getId())) {
+//        expenseService.deleteExpense(id);
+//        return ResponseEntity.ok().build();
+//      } else {
+//        throw new AccessDeniedException("You are not authorized to access this resource.");
+//      }
+//    } else {
+//      throw new AccessDeniedException("You are not authorized to access this resource.");
+//    }
   }
 
   @PutMapping("/update")
@@ -101,18 +107,20 @@ public class ExpenseController {
 
     UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-    if (hasUserRole("MODERATOR", authentication) || hasUserRole("ADMIN", authentication)) {
-      return ResponseEntity.ok(expenseService.updateExpense(expense));
+    return ResponseEntity.ok(expenseService.updateExpense(expense));
 
-    } else if (hasUserRole("USER", authentication)) {
-      if (userDetails.getId().equals(expense.getUser().getId())) {
-        return ResponseEntity.ok(expenseService.updateExpense(expense));
-      } else {
-        throw new AccessDeniedException("You are not authorized to access this resource.");
-      }
-    } else {
-      throw new AccessDeniedException("You are not authorized to access this resource.");
-    }
+//    if (hasUserRole("MODERATOR", authentication) || hasUserRole("ADMIN", authentication)) {
+//      return ResponseEntity.ok(expenseService.updateExpense(expense));
+//
+//    } else if (hasUserRole("USER", authentication)) {
+//      if (userDetails.getId().equals(expense.getUser().getId())) {
+//        return ResponseEntity.ok(expenseService.updateExpense(expense));
+//      } else {
+//        throw new AccessDeniedException("You are not authorized to access this resource.");
+//      }
+//    } else {
+//      throw new AccessDeniedException("You are not authorized to access this resource.");
+//    }
   }
 
   private boolean hasUserRole(String roleName, Authentication authentication) {

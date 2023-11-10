@@ -1,6 +1,6 @@
-package co.rcprdn.lodgyserver.repository;
+/*package co.rcprdn.lodgyserver.repository;
 
-import co.rcprdn.lodgyserver.entity.UserTripExpense;
+//import co.rcprdn.lodgyserver.entity.UserTripExpense;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,4 +12,4 @@ public interface UserTripExpenseRepository extends JpaRepository<UserTripExpense
   List<UserTripExpense> findByTripId(Long tripId);
 
   List<UserTripExpense> findByUserIdAndTripId(Long userId, Long tripId);
-}
+}*/

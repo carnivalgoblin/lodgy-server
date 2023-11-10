@@ -1,17 +1,18 @@
 package co.rcprdn.lodgyserver.controller;
 
 import co.rcprdn.lodgyserver.entity.Trip;
-import co.rcprdn.lodgyserver.entity.UserTripExpense;
+//import co.rcprdn.lodgyserver.entity.UserTripExpense;
+import co.rcprdn.lodgyserver.entity.User;
 import co.rcprdn.lodgyserver.security.services.UserDetailsImpl;
 import co.rcprdn.lodgyserver.service.TripService;
 import co.rcprdn.lodgyserver.service.UserService;
-import co.rcprdn.lodgyserver.service.UserTripExpenseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,8 +24,6 @@ public class TripController {
   private final TripService tripService;
 
   private final UserService userService;
-
-  private final UserTripExpenseService userTripExpenseService;
 
   @GetMapping("/all")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
@@ -89,51 +88,20 @@ public class TripController {
 
   @PostMapping("/{tripId}/addUser/{userId}")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-  public ResponseEntity<UserTripExpense> addUserToTrip(@PathVariable("tripId") long tripId, @PathVariable("userId") long userId) {
+  public ResponseEntity<Trip> addUserToTrip(@PathVariable("tripId") long tripId, @PathVariable("userId") long userId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+    if (userDetails != null) {
 
-    UserTripExpense userTripExpense = userTripExpenseService.addUserToTrip(userId, tripId);
+      Trip trip = tripService.addUserToTrip(tripId, userId);
 
-    return ResponseEntity.ok(userTripExpense);
-
-//    if (hasUserRole("MODERATOR", authentication) || hasUserRole("ADMIN", authentication)) {
-//
-//      if (trip == null) {
-//        throw new ResourceNotFoundException("Trip not found with ID: " + tripId);
-//      }
-//
-//      if (user == null) {
-//        throw new ResourceNotFoundException("User not found with ID: " + userId);
-//      }
-//
-//      trip.getUsers().add(user);
-//      tripService.updateTrip(trip);
-//
-//      return ResponseEntity.ok(trip);
-//
-//    } else if (hasUserRole("USER", authentication)) {
-//
-//      if (userDetails.getId().equals(userId)) {
-//
-//        if (trip == null) {
-//          throw new ResourceNotFoundException("Trip not found with ID: " + tripId);
-//        }
-//
-//        trip.getUsers().add(user);
-//        tripService.updateTrip(trip);
-//
-//        return ResponseEntity.ok(trip);
-//
-//      } else {
-//        throw new AccessDeniedException("You are not authorized to access this resource.");
-//      }
-//    } else {
-//      throw new AccessDeniedException("You are not authorized to access this resource.");
-//    }
+      return new ResponseEntity<>(trip, HttpStatus.OK);
+    } else {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
   }
+
 
   @DeleteMapping("/delete/{id}")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
@@ -181,18 +149,6 @@ public class TripController {
 //    }
 //  }
 
-  private ResponseEntity<Trip> getTripResponseEntity(@RequestBody Trip trip, @RequestParam int numberOfNights, Trip existingTrip) {
-//    TripNights tripNights = existingTrip.getNights().get(0);
-//    tripNights.setNumberOfNights(numberOfNights);
-    existingTrip.setDestination(trip.getDestination());
-    existingTrip.setStartDate(trip.getStartDate());
-    existingTrip.setEndDate(trip.getEndDate());
-    existingTrip.setDescription(trip.getDescription());
-
-    Trip updatedTrip = tripService.updateTrip(existingTrip);
-
-    return ResponseEntity.ok(updatedTrip);
-  }
 
   private boolean hasUserRole(String roleName, Authentication authentication) {
     return authentication.getAuthorities().stream()
