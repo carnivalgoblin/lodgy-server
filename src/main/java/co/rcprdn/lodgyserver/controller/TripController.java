@@ -21,14 +21,16 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static co.rcprdn.lodgyserver.service.TripService.getTripDTO;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/trips")
 public class TripController {
 
   private final TripService tripService;
-
   private final UserService userService;
+
 
   @GetMapping("/all")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
@@ -100,19 +102,18 @@ public class TripController {
 
   @PostMapping("/{tripId}/addUser/{userId}")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-  public ResponseEntity<Trip> addUserToTrip(@PathVariable("tripId") long tripId, @PathVariable("userId") long userId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
-
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+  public ResponseEntity<TripDTO> addUserToTrip(@PathVariable("tripId") long tripId,
+                                               @PathVariable("userId") long userId,
+                                               @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
     if (userDetails != null) {
-
-      Trip trip = tripService.addUserToTrip(tripId, userId);
-
-      return new ResponseEntity<>(trip, HttpStatus.OK);
+      TripDTO tripDTO = tripService.addUserToTrip(tripId, userId);
+      return new ResponseEntity<>(tripDTO, HttpStatus.OK);
     } else {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
   }
+
 
 
   @DeleteMapping("/delete/{id}")
@@ -168,16 +169,6 @@ public class TripController {
   }
 
   private TripDTO convertToDTO(Trip trip) {
-    TripDTO tripDTO = new TripDTO();
-
-    tripDTO.setId(trip.getId());
-    tripDTO.setDestination(trip.getDestination());
-    tripDTO.setStartDate(String.valueOf(trip.getStartDate()));
-    tripDTO.setEndDate(String.valueOf(trip.getEndDate()));
-    tripDTO.setDescription(trip.getDescription());
-    tripDTO.setUserIds(trip.getUsers().stream().map(User::getId).collect(Collectors.toList()));
-    tripDTO.setExpenseIds(trip.getExpenses().stream().map(Expense::getId).collect(Collectors.toList()));
-
-    return tripDTO;
+    return getTripDTO(trip);
   }
 }

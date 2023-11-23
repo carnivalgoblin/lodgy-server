@@ -1,5 +1,7 @@
 package co.rcprdn.lodgyserver.service;
 
+import co.rcprdn.lodgyserver.dto.TripDTO;
+import co.rcprdn.lodgyserver.entity.Expense;
 import co.rcprdn.lodgyserver.entity.Trip;
 import co.rcprdn.lodgyserver.entity.User;
 import co.rcprdn.lodgyserver.repository.TripRepository;
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Service
@@ -38,33 +41,35 @@ public class TripService {
     tripRepository.deleteById(id);
   }
 
-  public Trip addUserToTrip(Long tripId, Long userId) {
-    Optional<User> userOptional = userRepository.findById(userId);
-    Optional<Trip> tripOptional = tripRepository.findById(tripId);
+  public TripDTO addUserToTrip(long tripId, long userId) {
+    Trip trip = tripRepository.findById(tripId)
+            .orElseThrow(() -> new RuntimeException("Trip not found with id: " + tripId));
 
-    if (userOptional.isPresent() && tripOptional.isPresent()) {
-      User user = userOptional.get();
-      Trip trip = tripOptional.get();
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
 
-      // Füge den Benutzer zum Trip hinzu
-      trip.getUsers().add(user);
-      user.getTrips().add(trip);
+    trip.getUsers().add(user);
+    tripRepository.save(trip);
 
-      // Speichere die Aktualisierungen in der Datenbank
-      tripRepository.save(trip);
-      userRepository.save(user);
+    // Assuming you have a method to convert Trip to TripDTO
+    return convertToDTO(trip);
+  }
 
-      if (!trip.getUsers().contains(user)) {
-        trip.getUsers().add(user);
-        return tripRepository.save(trip);
-      } else {
-        // Beziehung besteht bereits
-        return trip;
-      }
-    } else {
-      // Benutzer oder Trip nicht gefunden
-      // Hier könntest du eine entsprechende Fehlerbehandlung durchführen
-      return null;
-    }
+  private TripDTO convertToDTO(Trip trip) {
+    return getTripDTO(trip);
+  }
+
+  public static TripDTO getTripDTO(Trip trip) {
+    TripDTO tripDTO = new TripDTO();
+
+    tripDTO.setId(trip.getId());
+    tripDTO.setDestination(trip.getDestination());
+    tripDTO.setStartDate(String.valueOf(trip.getStartDate()));
+    tripDTO.setEndDate(String.valueOf(trip.getEndDate()));
+    tripDTO.setDescription(trip.getDescription());
+    tripDTO.setUserIds(trip.getUsers().stream().map(User::getId).collect(Collectors.toList()));
+    tripDTO.setExpenseIds(trip.getExpenses().stream().map(Expense::getId).collect(Collectors.toList()));
+
+    return tripDTO;
   }
 }
