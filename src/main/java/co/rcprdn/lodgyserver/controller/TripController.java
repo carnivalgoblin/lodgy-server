@@ -2,9 +2,6 @@ package co.rcprdn.lodgyserver.controller;
 
 import co.rcprdn.lodgyserver.dto.TripDTO;
 import co.rcprdn.lodgyserver.entity.Trip;
-//import co.rcprdn.lodgyserver.entity.UserTripExpense;
-import co.rcprdn.lodgyserver.entity.User;
-import co.rcprdn.lodgyserver.entity.Expense;
 import co.rcprdn.lodgyserver.security.services.UserDetailsImpl;
 import co.rcprdn.lodgyserver.service.TripService;
 import co.rcprdn.lodgyserver.service.UserService;

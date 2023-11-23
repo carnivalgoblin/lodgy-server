@@ -1,23 +1,17 @@
 package co.rcprdn.lodgyserver.controller;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import co.rcprdn.lodgyserver.entity.Role;
 import co.rcprdn.lodgyserver.entity.User;
 import co.rcprdn.lodgyserver.enums.ERole;
+import co.rcprdn.lodgyserver.payload.request.LoginRequest;
+import co.rcprdn.lodgyserver.payload.request.SignupRequest;
+import co.rcprdn.lodgyserver.payload.response.MessageResponse;
 import co.rcprdn.lodgyserver.payload.response.UserInfoResponse;
 import co.rcprdn.lodgyserver.repository.RoleRepository;
 import co.rcprdn.lodgyserver.repository.UserRepository;
 import co.rcprdn.lodgyserver.security.jwt.JwtUtils;
 import co.rcprdn.lodgyserver.security.services.UserDetailsImpl;
-import co.rcprdn.lodgyserver.payload.request.LoginRequest;
-import co.rcprdn.lodgyserver.payload.request.SignupRequest;
-import co.rcprdn.lodgyserver.payload.response.MessageResponse;
 import jakarta.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -28,11 +22,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController

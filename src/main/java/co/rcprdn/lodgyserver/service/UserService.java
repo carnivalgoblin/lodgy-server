@@ -1,10 +1,6 @@
 package co.rcprdn.lodgyserver.service;
 
-import co.rcprdn.lodgyserver.entity.Expense;
-import co.rcprdn.lodgyserver.entity.Trip;
 import co.rcprdn.lodgyserver.entity.User;
-import co.rcprdn.lodgyserver.repository.ExpenseRepository;
-import co.rcprdn.lodgyserver.repository.TripRepository;
 import co.rcprdn.lodgyserver.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
