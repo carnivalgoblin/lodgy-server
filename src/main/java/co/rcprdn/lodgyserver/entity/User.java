@@ -1,6 +1,5 @@
 package co.rcprdn.lodgyserver.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -10,7 +9,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -48,9 +49,13 @@ public class User {
           inverseJoinColumns = @JoinColumn(name = "role_id"))
   private Set<Role> roles = new HashSet<>();
 
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Expense> expenses = new ArrayList<>();
+
+
+
   @ManyToMany(mappedBy = "users")
-  @JsonIgnoreProperties("users")
-  private Set<Trip> trips = new HashSet<>();
+  private List<Trip> trips = new ArrayList<>();
 
   public User(String username, String email, String password) {
     this.username = username;
@@ -58,11 +63,5 @@ public class User {
     this.password = password;
   }
 
-  // METHODS
-
-  public void addTrip(Trip trip) {
-    this.trips.add(trip);
-    trip.getUsers().add(this);
-  }
 
 }

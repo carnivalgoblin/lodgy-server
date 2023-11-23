@@ -1,9 +1,13 @@
 package co.rcprdn.lodgyserver.controller;
 
+import co.rcprdn.lodgyserver.dto.ExpenseDTO;
 import co.rcprdn.lodgyserver.entity.Expense;
+import co.rcprdn.lodgyserver.repository.TripRepository;
+import co.rcprdn.lodgyserver.repository.UserRepository;
 import co.rcprdn.lodgyserver.security.services.UserDetailsImpl;
 import co.rcprdn.lodgyserver.service.ExpenseService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -11,22 +15,32 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/expenses")
 public class ExpenseController {
 
   private final ExpenseService expenseService;
+  private final UserRepository userRepository;
+  private final TripRepository tripRepository;
 
   @GetMapping("/all")
   @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
-  public ResponseEntity<Iterable<Expense>> getAllExpenses() {
-    return ResponseEntity.ok(expenseService.getAllExpenses());
+  public ResponseEntity<List<ExpenseDTO>> getAllExpenses() {
+    List<Expense> expenses = expenseService.getAllExpenses();
+    List<ExpenseDTO> expenseDTOs = convertToDTOs(expenses);
+    return new ResponseEntity<>(expenseDTOs, HttpStatus.OK);
   }
+
+
+
 
   @GetMapping("/{expenseId}")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-  public ResponseEntity<Expense> getExpenseById(@PathVariable("expenseId") long expenseId) {
+  public ResponseEntity<ExpenseDTO> getExpenseById(@PathVariable Long expenseId) {
 
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -34,7 +48,12 @@ public class ExpenseController {
 
     Expense expense = expenseService.getExpenseById(expenseId);
 
-    return ResponseEntity.ok(expense);
+    if (expense != null) {
+      ExpenseDTO expenseDTO = convertToDTO(expense);
+      return new ResponseEntity<>(expenseDTO, HttpStatus.OK);
+    } else {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
 
 //    if (hasUserRole("MODERATOR", authentication) || hasUserRole("ADMIN", authentication)) {
 //      return ResponseEntity.ok(expense);
@@ -51,14 +70,27 @@ public class ExpenseController {
   }
 
   @PostMapping("/create")
-  @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-  public ResponseEntity<Expense> createExpense(Expense expense) {
+  public ResponseEntity<String> addExpense(@RequestBody ExpenseDTO expenseDTO, @RequestParam Long tripId) {
+    // Perform any necessary validation or business logic
 
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    // Convert DTO to entity
+    Expense expense = convertToEntity(expenseDTO);
 
-    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+    // Save the expense
+    expenseService.createExpense(expense, tripId);
 
-    return ResponseEntity.ok(expenseService.createExpense(expense));
+    return new ResponseEntity<>("Expense added successfully", HttpStatus.CREATED);
+  }
+
+//  @PostMapping("/create")
+//  @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+//  public ResponseEntity<Expense> createExpense(@RequestBody Expense expense) {
+//
+//    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//
+//    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+//
+//    return ResponseEntity.ok(expenseService.createExpense(expense));
 
 //    if (hasUserRole("MODERATOR", authentication) || hasUserRole("ADMIN", authentication)) {
 //      return ResponseEntity.ok(expenseService.createExpense(expense));
@@ -72,7 +104,7 @@ public class ExpenseController {
 //    } else {
 //      throw new AccessDeniedException("You are not authorized to access this resource.");
 //    }
-  }
+//  }
 
   @DeleteMapping("/delete/{id}")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
@@ -126,6 +158,44 @@ public class ExpenseController {
   private boolean hasUserRole(String roleName, Authentication authentication) {
     return authentication.getAuthorities().stream()
             .anyMatch(authority -> authority.getAuthority().equals("ROLE_" + roleName));
+  }
+
+  private List<ExpenseDTO> convertToDTOs(List<Expense> expenses) {
+    List<ExpenseDTO> expenseDTOs = new ArrayList<>();
+    for (Expense expense : expenses) {
+      ExpenseDTO expenseDTO = new ExpenseDTO();
+      expenseDTO.setId(expense.getId());
+      expenseDTO.setTripId(expense.getTrip().getId());
+      expenseDTO.setUserId(expense.getUser().getId());
+      expenseDTO.setAmount(expense.getAmount());
+      expenseDTO.setDescription(expense.getDescription());
+
+      expenseDTOs.add(expenseDTO);
+    }
+    return expenseDTOs;
+  }
+
+  private ExpenseDTO convertToDTO(Expense expense) {
+    ExpenseDTO expenseDTO = new ExpenseDTO();
+
+    expenseDTO.setId(expense.getId());
+    expenseDTO.setTripId(expense.getTrip().getId());
+    expenseDTO.setUserId(expense.getUser().getId());
+    expenseDTO.setAmount(expense.getAmount());
+    expenseDTO.setDescription(expense.getDescription());
+
+    return expenseDTO;
+  }
+
+  private Expense convertToEntity(ExpenseDTO expenseDTO) {
+    Expense expense = new Expense();
+
+    expense.setUserId(expenseDTO.getUserId(), userRepository);
+    expense.setTripId(expenseDTO.getTripId(), tripRepository);
+    expense.setAmount(expenseDTO.getAmount());
+    expense.setDescription(expenseDTO.getDescription());
+
+    return expense;
   }
 
 }

@@ -9,9 +9,16 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginRequest {
+public class ExpenseDTO {
 
-  private String username;
-  private String password;
+  private Long id;
+
+  private Long userId;
+
+  private Long tripId;
+
+  private Double amount;
+
+  private String description;
 
 }

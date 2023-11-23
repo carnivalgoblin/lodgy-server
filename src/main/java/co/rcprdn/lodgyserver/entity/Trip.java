@@ -1,8 +1,10 @@
 package co.rcprdn.lodgyserver.entity;
 
-import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.*;
 
@@ -28,21 +30,14 @@ public class Trip {
 
   @ManyToMany
   @JoinTable(
-          name = "user_trip",
+          name = "trip_user",
           joinColumns = @JoinColumn(name = "trip_id"),
           inverseJoinColumns = @JoinColumn(name = "user_id"))
-  @JsonIgnoreProperties("trips")
-  private Set<User> users = new HashSet<>();
+  private List<User> users = new ArrayList<>();
+
+
 
   @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
-  private Set<Expense> expenses = new HashSet<>();
-
-
-  // METHODS
-
-  public void addUser(User user) {
-    this.users.add(user);
-    user.getTrips().add(this);
-  }
+  private List<Expense> expenses = new ArrayList<>();
 
 }

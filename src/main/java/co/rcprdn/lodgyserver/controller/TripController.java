@@ -1,8 +1,10 @@
 package co.rcprdn.lodgyserver.controller;
 
+import co.rcprdn.lodgyserver.dto.TripDTO;
 import co.rcprdn.lodgyserver.entity.Trip;
 //import co.rcprdn.lodgyserver.entity.UserTripExpense;
 import co.rcprdn.lodgyserver.entity.User;
+import co.rcprdn.lodgyserver.entity.Expense;
 import co.rcprdn.lodgyserver.security.services.UserDetailsImpl;
 import co.rcprdn.lodgyserver.service.TripService;
 import co.rcprdn.lodgyserver.service.UserService;
@@ -16,6 +18,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/trips")
@@ -27,22 +32,30 @@ public class TripController {
 
   @GetMapping("/all")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-  public ResponseEntity<Iterable<Trip>> getAllTrips() {
-    return ResponseEntity.ok(tripService.getAllTrips());
+  public ResponseEntity<List<TripDTO>> getAllTrips() {
+    List<Trip> trips = tripService.getAllTrips();
+
+    if (!trips.isEmpty()) {
+      List<TripDTO> tripDTOs = trips.stream()
+              .map(this::convertToDTO)
+              .collect(Collectors.toList());
+      return new ResponseEntity<>(tripDTOs, HttpStatus.OK);
+    } else {
+      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
   }
 
   @GetMapping("/{tripId}")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-  public ResponseEntity<Trip> getTripById(@PathVariable("tripId") long tripId) {
-
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-
+  public ResponseEntity<TripDTO> getTripById(@PathVariable Long tripId) {
     Trip trip = tripService.getTripById(tripId);
 
-    if (hasUserRole("MODERATOR", authentication) || hasUserRole("ADMIN", authentication)) {
-      return ResponseEntity.ok(trip);
+    if (trip != null) {
+      TripDTO tripDTO = convertToDTO(trip);
+      return new ResponseEntity<>(tripDTO, HttpStatus.OK);
+    } else {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
 
 //    } else if (hasUserRole("USER", authentication)) {
 //      if (trip.getUsers().contains(userDetails.getUser())) {
@@ -53,7 +66,6 @@ public class TripController {
 //    } else {
 //      throw new AccessDeniedException("You are not authorized to access this resource.");
     }
-    return null;
   }
 
   @PostMapping("/create")
@@ -155,4 +167,17 @@ public class TripController {
             .anyMatch(authority -> authority.getAuthority().equals("ROLE_" + roleName));
   }
 
+  private TripDTO convertToDTO(Trip trip) {
+    TripDTO tripDTO = new TripDTO();
+
+    tripDTO.setId(trip.getId());
+    tripDTO.setDestination(trip.getDestination());
+    tripDTO.setStartDate(String.valueOf(trip.getStartDate()));
+    tripDTO.setEndDate(String.valueOf(trip.getEndDate()));
+    tripDTO.setDescription(trip.getDescription());
+    tripDTO.setUserIds(trip.getUsers().stream().map(User::getId).collect(Collectors.toList()));
+    tripDTO.setExpenseIds(trip.getExpenses().stream().map(Expense::getId).collect(Collectors.toList()));
+
+    return tripDTO;
+  }
 }

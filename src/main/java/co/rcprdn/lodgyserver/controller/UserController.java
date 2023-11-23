@@ -1,6 +1,7 @@
 package co.rcprdn.lodgyserver.controller;
 
 
+import co.rcprdn.lodgyserver.dto.UserDTO;
 import co.rcprdn.lodgyserver.entity.Expense;
 import co.rcprdn.lodgyserver.entity.Trip;
 import co.rcprdn.lodgyserver.entity.User;
@@ -8,6 +9,7 @@ import co.rcprdn.lodgyserver.security.services.UserDetailsImpl;
 import co.rcprdn.lodgyserver.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -30,8 +32,17 @@ public class UserController {
 
   @GetMapping("/all")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-  public List<User> getAllUsers() {
-    return userService.getAllUsers();
+  public ResponseEntity<List<UserDTO>> getAllUsers() {
+    List<User> users = userService.getAllUsers();
+
+    if (!users.isEmpty()) {
+      List<UserDTO> userDTOs = users.stream()
+              .map(this::convertToDTO)
+              .collect(Collectors.toList());
+      return new ResponseEntity<>(userDTOs, HttpStatus.OK);
+    } else {
+      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
   }
 
   @GetMapping("/{userId}")
@@ -150,6 +161,17 @@ public class UserController {
   private boolean hasUserRole(String roleName, Authentication authentication) {
     return authentication.getAuthorities().stream()
             .anyMatch(authority -> authority.getAuthority().equals("ROLE_" + roleName));
+  }
+
+  private UserDTO convertToDTO(User user) {
+    UserDTO userDTO = new UserDTO();
+
+    userDTO.setId(user.getId());
+    userDTO.setUsername(user.getUsername());
+    userDTO.setExpenseIds(user.getExpenses().stream().map(Expense::getId).collect(Collectors.toList()));
+    userDTO.setTripIds(user.getTrips().stream().map(Trip::getId).collect(Collectors.toList()));
+
+    return userDTO;
   }
 
 }

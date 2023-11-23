@@ -1,7 +1,9 @@
 package co.rcprdn.lodgyserver.service;
 
 import co.rcprdn.lodgyserver.entity.Expense;
+import co.rcprdn.lodgyserver.entity.Trip;
 import co.rcprdn.lodgyserver.repository.ExpenseRepository;
+import co.rcprdn.lodgyserver.repository.TripRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +14,7 @@ import java.util.List;
 public class ExpenseService {
 
   private final ExpenseRepository expenseRepository;
+  private final TripRepository tripRepository;
 
   public List<Expense> getAllExpenses() {
     return expenseRepository.findAll();
@@ -21,8 +24,11 @@ public class ExpenseService {
     return expenseRepository.findById(id).orElseThrow(() -> new RuntimeException("Expense not found"));
   }
 
-  public Expense createExpense(Expense expense) {
-    return expenseRepository.save(expense);
+  public void createExpense(Expense expense, Long tripId) {
+    Trip trip = tripRepository.findById(tripId).orElseThrow(() -> new RuntimeException("Trip not found with id: " + tripId));
+    expense.setTrip(trip);
+    expenseRepository.save(expense);
+
   }
 
   public Expense updateExpense(Expense expense) {
