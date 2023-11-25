@@ -52,10 +52,11 @@ public class User {
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Expense> expenses = new ArrayList<>();
 
-
-
   @ManyToMany(mappedBy = "users")
   private List<Trip> trips = new ArrayList<>();
+
+  @Column(name = "is_activated")
+  private boolean isActivated = false; // Set to false by default
 
   public User(String username, String email, String password) {
     this.username = username;

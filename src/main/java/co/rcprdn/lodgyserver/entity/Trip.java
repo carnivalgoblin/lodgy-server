@@ -9,6 +9,7 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -37,9 +38,21 @@ public class Trip {
           inverseJoinColumns = @JoinColumn(name = "user_id"))
   private List<User> users = new ArrayList<>();
 
-
-
   @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Expense> expenses = new ArrayList<>();
+
+  // METHODS
+
+  public List<Long> getUserIdList() {
+    return users.stream()
+            .map(User::getId)
+            .collect(Collectors.toList());
+  }
+
+  public List<Long> getExpenseIdList() {
+    return expenses.stream()
+            .map(Expense::getId)
+            .collect(Collectors.toList());
+  }
 
 }
