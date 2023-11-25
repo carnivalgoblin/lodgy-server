@@ -71,4 +71,8 @@ public class TripService {
 
     return tripDTO;
   }
+
+  public boolean existsById(Long tripId) {
+    return tripRepository.existsById(tripId);
+  }
 }

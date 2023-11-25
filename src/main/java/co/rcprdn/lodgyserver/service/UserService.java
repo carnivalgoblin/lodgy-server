@@ -41,4 +41,7 @@ public class UserService {
     return userRepository.existsByEmail(email);
   }
 
+  public boolean existsById(Long userId) {
+    return userRepository.existsById(userId);
+  }
 }
