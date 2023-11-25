@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Date;
 import java.util.List;
 
 @Getter
@@ -17,13 +18,17 @@ public class TripDTO {
 
   private String destination;
 
-  private String startDate;
+  private Date startDate;
 
-  private String endDate;
+  private Date endDate;
 
   private String description;
 
   private List<Long> userIds;
 
   private List<Long> expenseIds;
+
+  public void setUserIds(List<Long> userIds) {
+    this.userIds = userIds;
+  }
 }

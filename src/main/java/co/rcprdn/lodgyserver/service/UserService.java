@@ -20,6 +20,9 @@ public class UserService {
   public User getUserById(Long id) {
     return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
   }
+  public List<User> getUsersByIds(List<Long> userIds) {
+    return userRepository.findAllById(userIds);
+  }
 
   public User updateUser(User user) {
     return userRepository.save(user);
