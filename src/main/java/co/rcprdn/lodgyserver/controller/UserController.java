@@ -36,7 +36,7 @@ public class UserController {
 
     if (!users.isEmpty()) {
       List<UserDTO> userDTOs = users.stream()
-              .map(this::convertToDTO)
+              .map(this::convertUserToDTO)
               .collect(Collectors.toList());
       return new ResponseEntity<>(userDTOs, HttpStatus.OK);
     } else {
@@ -46,23 +46,20 @@ public class UserController {
 
   @GetMapping("/{userId}")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-  public User getUserById(@PathVariable("userId") long userId) {
+  public ResponseEntity<UserDTO> getUserById(@PathVariable("userId") long userId) {
 
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
     UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-    if (hasUserRole("MODERATOR", authentication) || hasUserRole("ADMIN", authentication)) {
-      return userService.getUserById(userId);
+    User user = userService.getUserById(userId);
 
-    } else if (hasUserRole("USER", authentication)) {
-      if (userDetails.getId().equals(userId)) {
-        return userService.getUserById(userId);
-      } else {
-        throw AuthenticationException.class.cast(HttpStatus.UNAUTHORIZED);
-      }
+    if (hasUserRole("MODERATOR", authentication) || hasUserRole("ADMIN", authentication) ||
+            (hasUserRole("USER", authentication) && userDetails.getId().equals(userId))) {
+      UserDTO userDTO = convertUserToDTO(user);
+      return new ResponseEntity<>(userDTO, HttpStatus.OK);
     } else {
-      throw AuthenticationException.class.cast(HttpStatus.NOT_FOUND);
+      return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
   }
 
@@ -162,7 +159,7 @@ public class UserController {
             .anyMatch(authority -> authority.getAuthority().equals("ROLE_" + roleName));
   }
 
-  private UserDTO convertToDTO(User user) {
+  private UserDTO convertUserToDTO(User user) {
     UserDTO userDTO = new UserDTO();
 
     userDTO.setId(user.getId());
