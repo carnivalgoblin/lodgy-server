@@ -37,8 +37,6 @@ public class Trip {
           inverseJoinColumns = @JoinColumn(name = "user_id"))
   private List<User> users = new ArrayList<>();
 
-
-
   @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Expense> expenses = new ArrayList<>();
 
