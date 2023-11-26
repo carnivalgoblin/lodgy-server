@@ -43,5 +43,28 @@ public class DatabaseInitializer implements CommandLineRunner {
 
     userRepository.save(adminUser);
 
+    User modUser = new User();
+
+    modUser.setUsername("mod");
+    modUser.setEmail("mod@mail.com");
+    modUser.setPassword(encoder.encode("12345678")); // Set new password here!
+    Set<Role> modRoles = new HashSet<>();
+    modRoles.add(roleRepository.findByName(ROLE_MODERATOR).orElseThrow(() -> new RuntimeException("Error: Role is not found.")));
+    modRoles.add(roleRepository.findByName(ROLE_USER).orElseThrow(() -> new RuntimeException("Error: Role is not found.")));
+    modUser.setRoles(modRoles);
+
+    userRepository.save(modUser);
+
+    User testUser = new User();
+
+    testUser.setUsername("test");
+    testUser.setEmail("test@mail.com");
+    testUser.setPassword(encoder.encode("12345678")); // Set new password here!
+    Set<Role> testRoles = new HashSet<>();
+    testRoles.add(roleRepository.findByName(ROLE_USER).orElseThrow(() -> new RuntimeException("Error: Role is not found.")));
+    testUser.setRoles(testRoles);
+
+    userRepository.save(testUser);
+
   }
 }
