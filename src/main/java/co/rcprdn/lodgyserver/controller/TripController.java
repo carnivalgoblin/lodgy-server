@@ -1,10 +1,13 @@
 package co.rcprdn.lodgyserver.controller;
 
 import co.rcprdn.lodgyserver.dto.TripDTO;
+import co.rcprdn.lodgyserver.dto.UserTripDTO;
 import co.rcprdn.lodgyserver.entity.Trip;
+import co.rcprdn.lodgyserver.entity.UserTrip;
 import co.rcprdn.lodgyserver.security.services.UserDetailsImpl;
 import co.rcprdn.lodgyserver.service.TripService;
 import co.rcprdn.lodgyserver.service.UserService;
+import co.rcprdn.lodgyserver.service.UserTripService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static co.rcprdn.lodgyserver.service.TripService.getTripDTO;
+import static co.rcprdn.lodgyserver.service.UserTripService.getUserTripDTO;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,6 +31,7 @@ public class TripController {
 
   private final TripService tripService;
   private final UserService userService;
+  private final UserTripService userTripService;
 
 
   @GetMapping("/all")
@@ -36,7 +41,7 @@ public class TripController {
 
     if (!trips.isEmpty()) {
       List<TripDTO> tripDTOs = trips.stream()
-              .map(this::convertToDTO)
+              .map(this::convertTripToDTO)
               .collect(Collectors.toList());
       return new ResponseEntity<>(tripDTOs, HttpStatus.OK);
     } else {
@@ -50,7 +55,7 @@ public class TripController {
     Trip trip = tripService.getTripById(tripId);
 
     if (trip != null) {
-      TripDTO tripDTO = convertToDTO(trip);
+      TripDTO tripDTO = convertTripToDTO(trip);
       return new ResponseEntity<>(tripDTO, HttpStatus.OK);
     } else {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -101,16 +106,16 @@ public class TripController {
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
   public ResponseEntity<TripDTO> addUserToTrip(@PathVariable("tripId") long tripId,
                                                @PathVariable("userId") long userId,
+                                               @RequestParam("days") int days,
                                                @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
     if (userDetails != null) {
-      TripDTO tripDTO = tripService.addUserToTrip(tripId, userId);
+      TripDTO tripDTO = tripService.addUserToTrip(tripId, userId, days);
       return new ResponseEntity<>(tripDTO, HttpStatus.OK);
     } else {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
   }
-
 
 
   @DeleteMapping("/delete/{id}")
@@ -125,7 +130,7 @@ public class TripController {
       tripService.deleteTrip(id);
       return ResponseEntity.ok().build();
     } else if (hasUserRole("USER", authentication)) {
-        throw new AccessDeniedException("You are not authorized to delete trips.");
+      throw new AccessDeniedException("You are not authorized to delete trips.");
     } else {
       throw new AccessDeniedException("You are not authorized to access this resource.");
     }
@@ -159,13 +164,29 @@ public class TripController {
 //    }
 //  }
 
+  @GetMapping("/userTrip/{id}")
+  public ResponseEntity<UserTripDTO> getUserTrip(@PathVariable Long id) {
+    try {
+      UserTripDTO userTripDTO = userTripService.getUserTripById(id);
+      return new ResponseEntity<>(userTripDTO, HttpStatus.OK);
+    } catch (RuntimeException e) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+  }
+
 
   private boolean hasUserRole(String roleName, Authentication authentication) {
     return authentication.getAuthorities().stream()
             .anyMatch(authority -> authority.getAuthority().equals("ROLE_" + roleName));
   }
 
-  private TripDTO convertToDTO(Trip trip) {
+  private TripDTO convertTripToDTO(Trip trip) {
     return getTripDTO(trip);
   }
+
+
+  private UserTripDTO convertUserTripToDTO(UserTrip userTrip) {
+    return getUserTripDTO(userTrip);
+  }
+
 }

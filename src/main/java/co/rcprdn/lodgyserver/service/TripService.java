@@ -4,8 +4,10 @@ import co.rcprdn.lodgyserver.dto.TripDTO;
 import co.rcprdn.lodgyserver.entity.Expense;
 import co.rcprdn.lodgyserver.entity.Trip;
 import co.rcprdn.lodgyserver.entity.User;
+import co.rcprdn.lodgyserver.entity.UserTrip;
 import co.rcprdn.lodgyserver.repository.TripRepository;
 import co.rcprdn.lodgyserver.repository.UserRepository;
+import co.rcprdn.lodgyserver.repository.UserTripRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +21,8 @@ public class TripService {
   private final TripRepository tripRepository;
 
   private final UserRepository userRepository;
+
+  private final UserTripRepository userTripRepository;
 
   public List<Trip> getAllTrips() {
     return tripRepository.findAll();
@@ -40,15 +44,28 @@ public class TripService {
     tripRepository.deleteById(id);
   }
 
-  public TripDTO addUserToTrip(long tripId, long userId) {
+  public TripDTO addUserToTrip(long tripId, long userId, int days) {
     Trip trip = tripRepository.findById(tripId)
             .orElseThrow(() -> new RuntimeException("Trip not found with id: " + tripId));
 
     User user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
 
+    UserTrip userTrip = new UserTrip();
+
+    userTrip.setUser(user);
+    userTrip.setTrip(trip);
+    userTrip.setDays(days);
+
+// Assuming you have a repository for UserTrip
+    UserTrip savedUserTrip = userTripRepository.save(userTrip);
+
+// Now, update the associations in the Trip and User entities
     trip.getUsers().add(user);
+    user.getTrips().add(trip);
+
     tripRepository.save(trip);
+    userRepository.save(user);
 
     // Assuming you have a method to convert Trip to TripDTO
     return convertToDTO(trip);

@@ -26,4 +26,6 @@ public class TripDTO {
   private List<Long> userIds;
 
   private List<Long> expenseIds;
+
+  private List<UserTripDTO> userTrips;
 }

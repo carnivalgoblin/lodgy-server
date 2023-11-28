@@ -5,22 +5,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDTO {
+public class UserTripDTO {
 
   private Long id;
 
-  private String username;
+  private Long userId;
 
-  private List<Long> tripIds;
+  private Long tripId;
 
-  private List<Long> expenseIds;
-
-  private List<UserTripDTO> userTrips;
-
+  private int days;
 }
