@@ -68,6 +68,20 @@ public class ExpenseController {
 //    }
   }
 
+  @GetMapping("/trip/{tripId}/total")
+  @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+  public ResponseEntity<ExpenseDTO> getTotalExpensesByTripId(@PathVariable Long tripId) {
+    List<Expense> expenses = expenseService.getExpensesByTripId(tripId);
+
+    if (!expenses.isEmpty()) {
+      double totalAmount = expenses.stream().mapToDouble(Expense::getAmount).sum();
+      ExpenseDTO tripExpenseDTO = new ExpenseDTO(null, null, tripId, totalAmount, null);
+      return new ResponseEntity<>(tripExpenseDTO, HttpStatus.OK);
+    } else {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+  }
+
   @PostMapping("/create")
   public ResponseEntity<String> addExpense(@RequestBody ExpenseDTO expenseDTO, @RequestParam Long tripId) {
     // Perform any necessary validation or business logic

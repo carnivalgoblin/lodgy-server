@@ -39,4 +39,7 @@ public class ExpenseService {
     expenseRepository.deleteById(id);
   }
 
+  public List<Expense> getExpensesByTripId(Long tripId) {
+    return expenseRepository.findAllByTripId(tripId);
+  }
 }
