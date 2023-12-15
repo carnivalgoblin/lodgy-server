@@ -190,7 +190,7 @@ public class TripController {
   public ResponseEntity<List<UserTripDTO>> distributeCosts(
           @PathVariable Long tripId,
           @RequestBody List<UserTripDTO> userTripDTOs,
-          @RequestParam(defaultValue = "false") boolean basedOnDays) {
+          @RequestParam(defaultValue = "true") boolean basedOnDays) {
 
     TripDTO tripDTO = tripService.getTripDTOById(tripId);
 

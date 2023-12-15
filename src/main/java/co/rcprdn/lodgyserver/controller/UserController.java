@@ -1,11 +1,11 @@
 package co.rcprdn.lodgyserver.controller;
 
-
 import co.rcprdn.lodgyserver.dto.UserDTO;
 import co.rcprdn.lodgyserver.entity.Expense;
 import co.rcprdn.lodgyserver.entity.Trip;
 import co.rcprdn.lodgyserver.entity.User;
 import co.rcprdn.lodgyserver.entity.UserTrip;
+import co.rcprdn.lodgyserver.exceptions.ResourceNotFoundException;
 import co.rcprdn.lodgyserver.security.services.UserDetailsImpl;
 import co.rcprdn.lodgyserver.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -84,7 +83,7 @@ public class UserController {
         throw new AccessDeniedException("You are not authorized to access this resource.");
       }
     } else {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Resource not found.");
+      throw new ResourceNotFoundException("Resource not found.");
     }
   }
 
@@ -105,7 +104,7 @@ public class UserController {
         throw new AccessDeniedException("You are not authorized to access this resource.");
       }
     } else {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Resource not found.");
+      throw new ResourceNotFoundException("Resource not found.");
     }
   }
 
@@ -127,7 +126,7 @@ public class UserController {
 //        throw new AccessDeniedException("You are not authorized to access this resource.");
 //      }
 //    } else {
-//      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Resource not found.");
+//      throw new ResourceNotFoundException("Resource not found.");
 //    }
 //  }
 
@@ -149,7 +148,7 @@ public class UserController {
 //        throw new AccessDeniedException("You are not authorized to access this resource.");
 //      }
 //    } else {
-//      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Resource not found.");
+//      throw new ResourceNotFoundException("Resource not found.");
 //    }
 //  }
 
