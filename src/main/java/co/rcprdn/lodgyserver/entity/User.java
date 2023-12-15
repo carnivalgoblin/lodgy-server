@@ -55,6 +55,9 @@ public class User {
   @ManyToMany(mappedBy = "users")
   private List<Trip> trips = new ArrayList<>();
 
+  @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, fetch = FetchType.LAZY)
+  private List<UserTrip> userTrips = new ArrayList<>();
+
   public User(String username, String email, String password) {
     this.username = username;
     this.email = email;

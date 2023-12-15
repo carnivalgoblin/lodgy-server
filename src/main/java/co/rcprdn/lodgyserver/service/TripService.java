@@ -12,8 +12,11 @@ import co.rcprdn.lodgyserver.exceptions.UserAlreadyInTripException;
 import co.rcprdn.lodgyserver.repository.TripRepository;
 import co.rcprdn.lodgyserver.repository.UserRepository;
 import co.rcprdn.lodgyserver.repository.UserTripRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +31,9 @@ public class TripService {
   private final UserRepository userRepository;
 
   private final UserTripRepository userTripRepository;
+
+  @PersistenceContext
+  private EntityManager entityManager;
 
   public List<Trip> getAllTrips() {
     return tripRepository.findAll();
@@ -49,6 +55,7 @@ public class TripService {
     tripRepository.deleteById(id);
   }
 
+  @Transactional
   public TripDTO addUserToTrip(long tripId, long userId, int days) {
     Trip trip = tripRepository.findById(tripId)
             .orElseThrow(() -> new ResourceNotFoundException("Trip not found with id: " + tripId));
@@ -68,10 +75,14 @@ public class TripService {
     userTrip.setTrip(trip);
     userTrip.setDays(days);
 
+    UserTrip attachedUserTrip = entityManager.merge(userTrip);
+
     // Now, update the associations in the Trip and User entities
     trip.getUsers().add(user);
-    trip.getUserTrips().add(userTrip);
+    trip.getUserTrips().add(attachedUserTrip);
+
     user.getTrips().add(trip);
+    user.getUserTrips().add(attachedUserTrip);
 
     tripRepository.save(trip);
     userRepository.save(user);
@@ -127,15 +138,7 @@ public class TripService {
     tripDTO.setDescription(trip.getDescription());
     tripDTO.setUserIds(trip.getUsers().stream().map(User::getId).collect(Collectors.toList()));
     tripDTO.setExpenseIds(trip.getExpenses().stream().map(Expense::getId).collect(Collectors.toList()));
-    tripDTO.setUserTrips(trip.getUserTrips().stream()
-            .map(userTrip -> new UserTripDTO(
-                    userTrip.getId(),
-                    userTrip.getUser().getId(),
-                    userTrip.getTrip().getId(),
-                    userTrip.getDays(),
-                    userTrip.getOwedAmount()
-            ))
-            .collect(Collectors.toList()));
+    tripDTO.setUserTrips(trip.getUserTrips().stream().map(UserTrip::getId).collect(Collectors.toList()));
 
     return tripDTO;
   }

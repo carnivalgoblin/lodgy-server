@@ -5,6 +5,7 @@ import co.rcprdn.lodgyserver.dto.UserDTO;
 import co.rcprdn.lodgyserver.entity.Expense;
 import co.rcprdn.lodgyserver.entity.Trip;
 import co.rcprdn.lodgyserver.entity.User;
+import co.rcprdn.lodgyserver.entity.UserTrip;
 import co.rcprdn.lodgyserver.security.services.UserDetailsImpl;
 import co.rcprdn.lodgyserver.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -165,6 +166,7 @@ public class UserController {
     userDTO.setUsername(user.getUsername());
     userDTO.setExpenseIds(user.getExpenses().stream().map(Expense::getId).collect(Collectors.toList()));
     userDTO.setTripIds(user.getTrips().stream().map(Trip::getId).collect(Collectors.toList()));
+    userDTO.setUserTrips(user.getUserTrips().stream().map(UserTrip::getId).collect(Collectors.toList()));
 
     return userDTO;
   }

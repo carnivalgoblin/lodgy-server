@@ -21,6 +21,6 @@ public class UserDTO {
 
   private List<Long> expenseIds;
 
-  private List<UserTripDTO> userTrips;
+  private List<Long> userTrips;
 
 }
