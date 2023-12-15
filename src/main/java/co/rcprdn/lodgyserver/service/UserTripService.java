@@ -54,4 +54,12 @@ public class UserTripService {
   public UserTrip findById(Long id) {
     return userTripRepository.findById(id).orElseThrow(() -> new RuntimeException("UserTrip not found"));
   }
+
+  public List<UserTripDTO> getUserTripsForTrip(Long tripId) {
+    List<UserTrip> userTrips = userTripRepository.findAllByTripId(tripId);
+
+    return userTrips.stream()
+            .map(UserTripService::getUserTripDTO)
+            .collect(java.util.stream.Collectors.toList());
+  }
 }

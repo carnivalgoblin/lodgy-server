@@ -26,4 +26,6 @@ public class UserTrip {
   private Trip trip;
 
   private int days;
+
+  private double owedAmount;
 }

@@ -1,12 +1,13 @@
 package co.rcprdn.lodgyserver.controller;
 
+import co.rcprdn.lodgyserver.dto.ExpenseDTO;
 import co.rcprdn.lodgyserver.dto.TripDTO;
 import co.rcprdn.lodgyserver.dto.UserTripDTO;
 import co.rcprdn.lodgyserver.entity.Trip;
 import co.rcprdn.lodgyserver.entity.UserTrip;
 import co.rcprdn.lodgyserver.security.services.UserDetailsImpl;
+import co.rcprdn.lodgyserver.service.CostDistributionService;
 import co.rcprdn.lodgyserver.service.TripService;
-import co.rcprdn.lodgyserver.service.UserService;
 import co.rcprdn.lodgyserver.service.UserTripService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,9 +31,8 @@ import static co.rcprdn.lodgyserver.service.UserTripService.getUserTripDTO;
 public class TripController {
 
   private final TripService tripService;
-  private final UserService userService;
   private final UserTripService userTripService;
-
+  private final CostDistributionService costDistributionService;
 
   @GetMapping("/all")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
@@ -174,6 +174,32 @@ public class TripController {
     }
   }
 
+  @GetMapping("/{tripId}/userTrips")
+  public ResponseEntity<List<UserTripDTO>> getUserTripsForTrip(@PathVariable Long tripId) {
+    try {
+      List<UserTripDTO> userTrips = userTripService.getUserTripsForTrip(tripId);
+      return new ResponseEntity<>(userTrips, HttpStatus.OK);
+    } catch (RuntimeException e) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+  }
+
+  // Expenses
+
+  @PostMapping("/{tripId}/distribute-costs")
+  public ResponseEntity<List<UserTripDTO>> distributeCosts(
+          @PathVariable Long tripId,
+          @RequestBody List<UserTripDTO> userTripDTOs,
+          @RequestParam(defaultValue = "false") boolean basedOnDays) {
+
+    TripDTO tripDTO = tripService.getTripDTOById(tripId);
+
+    List<ExpenseDTO> expenseDTOs = tripService.getExpensesForTrip(tripId);
+
+    costDistributionService.distributeCosts(tripDTO, userTripDTOs, expenseDTOs, basedOnDays);
+
+    return ResponseEntity.ok(userTripDTOs);
+  }
 
   private boolean hasUserRole(String roleName, Authentication authentication) {
     return authentication.getAuthorities().stream()
@@ -183,7 +209,6 @@ public class TripController {
   private TripDTO convertTripToDTO(Trip trip) {
     return getTripDTO(trip);
   }
-
 
   private UserTripDTO convertUserTripToDTO(UserTrip userTrip) {
     return getUserTripDTO(userTrip);

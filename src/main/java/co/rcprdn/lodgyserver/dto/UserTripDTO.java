@@ -18,4 +18,14 @@ public class UserTripDTO {
   private Long tripId;
 
   private int days;
+
+  private double owedAmount;
+
+  public UserTripDTO(Long userId, Long tripId, int days, double owedAmount) {
+    this.userId = userId;
+    this.tripId = tripId;
+    this.days = days;
+    this.owedAmount = owedAmount;
+  }
+
 }
