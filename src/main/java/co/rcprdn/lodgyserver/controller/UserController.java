@@ -49,12 +49,10 @@ public class UserController {
 
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-
     User user = userService.getUserById(userId);
 
     if (hasUserRole("MODERATOR", authentication) || hasUserRole("ADMIN", authentication) ||
-            (hasUserRole("USER", authentication) && userDetails.getId().equals(userId))) {
+            (hasUserRole("USER", authentication))) {
       UserDTO userDTO = convertUserToDTO(user);
       return new ResponseEntity<>(userDTO, HttpStatus.OK);
     } else {
