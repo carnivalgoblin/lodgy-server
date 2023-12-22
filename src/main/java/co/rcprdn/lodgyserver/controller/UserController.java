@@ -1,5 +1,6 @@
 package co.rcprdn.lodgyserver.controller;
 
+import co.rcprdn.lodgyserver.dto.SimpleUserDTO;
 import co.rcprdn.lodgyserver.dto.UserDTO;
 import co.rcprdn.lodgyserver.entity.Expense;
 import co.rcprdn.lodgyserver.entity.Trip;
@@ -29,7 +30,7 @@ public class UserController {
   public final UserService userService;
 
   @GetMapping("/all")
-  @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+  @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
   public ResponseEntity<List<UserDTO>> getAllUsers() {
     List<User> users = userService.getAllUsers();
 
@@ -43,16 +44,33 @@ public class UserController {
     }
   }
 
+  @GetMapping("/all/usernames")
+  @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+  public ResponseEntity<List<SimpleUserDTO>> getAllUsernames() {
+    List<User> users = userService.getAllUsers();
+
+    if (!users.isEmpty()) {
+      List<SimpleUserDTO> userDTOs = users.stream()
+              .map(user -> new SimpleUserDTO(user.getId(), user.getUsername()))
+              .collect(Collectors.toList());
+      return new ResponseEntity<>(userDTOs, HttpStatus.OK);
+    } else {
+      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+  }
+
   @GetMapping("/{userId}")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
   public ResponseEntity<UserDTO> getUserById(@PathVariable("userId") long userId) {
 
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
     User user = userService.getUserById(userId);
 
     if (hasUserRole("MODERATOR", authentication) || hasUserRole("ADMIN", authentication) ||
-            (hasUserRole("USER", authentication))) {
+            (hasUserRole("USER", authentication ) && userDetails.getId().equals(userId))) {
       UserDTO userDTO = convertUserToDTO(user);
       return new ResponseEntity<>(userDTO, HttpStatus.OK);
     } else {

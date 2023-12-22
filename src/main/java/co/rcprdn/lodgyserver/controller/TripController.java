@@ -3,12 +3,12 @@ package co.rcprdn.lodgyserver.controller;
 import co.rcprdn.lodgyserver.dto.ExpenseDTO;
 import co.rcprdn.lodgyserver.dto.TripDTO;
 import co.rcprdn.lodgyserver.dto.UserTripDTO;
+import co.rcprdn.lodgyserver.entity.Expense;
+import co.rcprdn.lodgyserver.entity.Payment;
 import co.rcprdn.lodgyserver.entity.Trip;
 import co.rcprdn.lodgyserver.entity.UserTrip;
 import co.rcprdn.lodgyserver.security.services.UserDetailsImpl;
-import co.rcprdn.lodgyserver.service.CostDistributionService;
-import co.rcprdn.lodgyserver.service.TripService;
-import co.rcprdn.lodgyserver.service.UserTripService;
+import co.rcprdn.lodgyserver.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +32,10 @@ public class TripController {
 
   private final TripService tripService;
   private final UserTripService userTripService;
+  private final UserService userService;
   private final CostDistributionService costDistributionService;
+  private final PaymentCalculatorService paymentCalculatorService;
+  private final ExpenseService expenseService;
 
   @GetMapping("/all")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
@@ -198,7 +201,34 @@ public class TripController {
 
     costDistributionService.distributeCosts(tripDTO, userTripDTOs, expenseDTOs, basedOnDays);
 
-    return ResponseEntity.ok(userTripDTOs);
+    // Enhance UserTripDTOs with usernames
+    List<UserTripDTO> enhancedUserTripDTOs = userTripDTOs.stream()
+            .peek(userTripDTO -> {
+              // Assuming you have a method to get the username based on userId
+              String username = userService.getUsernameById(userTripDTO.getUserId());
+              userTripDTO.setUsername(username);
+            })
+            .collect(Collectors.toList());
+
+    return ResponseEntity.ok(enhancedUserTripDTOs);
+  }
+
+  @PostMapping("/{tripId}/calculate-payments")
+  public ResponseEntity<List<Payment>> calculatePayments(
+          @PathVariable String tripId,
+          @RequestBody List<UserTripDTO> userTripDTOs) {
+    // Use tripId to fetch expenses for the trip
+    List<Expense> expenses = expenseService.getExpensesByTripId(Long.parseLong(tripId));
+
+    // Convert Expense entities to ExpenseDTO
+    List<ExpenseDTO> expenseDTOs = expenses.stream()
+            .map(this::convertExpenseToDTO)
+            .collect(Collectors.toList());
+
+    // Perform payment calculations using userTripDTOs and expenseDTOs
+    List<Payment> payments = paymentCalculatorService.calculatePayments(userTripDTOs, expenseDTOs);
+
+    return ResponseEntity.ok(payments);
   }
 
   private boolean hasUserRole(String roleName, Authentication authentication) {
@@ -212,6 +242,18 @@ public class TripController {
 
   private UserTripDTO convertUserTripToDTO(UserTrip userTrip) {
     return getUserTripDTO(userTrip);
+  }
+
+  private ExpenseDTO convertExpenseToDTO(Expense expense) {
+    ExpenseDTO expenseDTO = new ExpenseDTO();
+
+    expenseDTO.setId(expense.getId());
+    expenseDTO.setTripId(expense.getTrip().getId());
+    expenseDTO.setAmount(expense.getAmount());
+    expenseDTO.setUserId(expense.getUser().getId());
+    expenseDTO.setDescription(expense.getDescription());
+
+    return expenseDTO;
   }
 
 }

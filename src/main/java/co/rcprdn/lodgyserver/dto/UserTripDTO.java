@@ -15,6 +15,8 @@ public class UserTripDTO {
 
   private Long userId;
 
+  private String username;
+
   private Long tripId;
 
   private int days;

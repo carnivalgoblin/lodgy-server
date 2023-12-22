@@ -41,4 +41,7 @@ public class UserService {
     return userRepository.existsByEmail(email);
   }
 
+  public String getUsernameById(Long userId) {
+    return userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found")).getUsername();
+  }
 }
