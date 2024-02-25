@@ -187,6 +187,43 @@ public class TripController {
     }
   }
 
+  // Get all user trips for the current user by userID
+  @GetMapping("/userTrips")
+  public ResponseEntity<List<UserTripDTO>> getUserTripsForUser(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+    try {
+      List<UserTripDTO> userTrips = userTripService.getAllUserTripsByUserId(userDetails.getId());
+      return new ResponseEntity<>(userTrips, HttpStatus.OK);
+    } catch (RuntimeException e) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+  }
+
+  @GetMapping("/userTrips/{userId}")
+  @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
+  public ResponseEntity<List<UserTripDTO>> getUserTripsForUserById(@PathVariable Long userId) {
+    try {
+      List<UserTripDTO> userTrips = userTripService.getAllUserTripsByUserId(userId);
+      return new ResponseEntity<>(userTrips, HttpStatus.OK);
+    } catch (RuntimeException e) {
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+  }
+
+  @GetMapping("/user/{userId}")
+  @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+  public ResponseEntity<List<TripDTO>> getTripsForUser(@PathVariable Long userId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    if (!userDetails.getId().equals(userId) && !hasUserRole("MODERATOR", userDetails) && !hasUserRole("ADMIN", userDetails)) {
+      throw new AccessDeniedException("You are not authorized to access this resource.");
+    }
+    List<TripDTO> trips = tripService.getTripsForUser(userId);
+    return ResponseEntity.ok(trips);
+  }
+
+  private boolean hasUserRole(String roleName, UserDetailsImpl userDetails) {
+    return userDetails.getAuthorities().stream()
+            .anyMatch(authority -> authority.getAuthority().equals("ROLE_" + roleName));
+  }
+
   // Expenses
 
   @PostMapping("/{tripId}/distribute-costs")

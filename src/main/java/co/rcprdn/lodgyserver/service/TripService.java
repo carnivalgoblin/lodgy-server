@@ -27,10 +27,9 @@ import java.util.stream.Collectors;
 public class TripService {
 
   private final TripRepository tripRepository;
-
   private final UserRepository userRepository;
-
   private final UserTripRepository userTripRepository;
+  private final UserTripService userTripService;
 
   @PersistenceContext
   private EntityManager entityManager;
@@ -91,6 +90,13 @@ public class TripService {
     return convertToDTO(trip);
   }
 
+  public List<TripDTO> getTripsForUser(Long userId) {
+    List<UserTripDTO> userTripDTOs = userTripService.getUserTripDTOsByUserId(userId);
+    return userTripDTOs.stream()
+            .map(userTripDTO -> this.getTripDTOById(userTripDTO.getTripId()))
+            .collect(Collectors.toList());
+  }
+
   public List<UserTripDTO> getOwedAmountsForTrip(Long tripId, List<UserTripDTO> userTripDTOs) {
     Trip trip = tripRepository.findById(tripId)
             .orElseThrow(() -> new RuntimeException("Trip not found"));
@@ -100,7 +106,7 @@ public class TripService {
     for (UserTripDTO userTripDTO : userTripDTOs) {
       User user = getUserById(userTripDTO.getUserId());  // Implement a method to get user by ID
       double owedAmount = calculateOwedAmount(userTripDTO);
-      userOwedAmounts.add(new UserTripDTO(user.getId(), trip.getId(), userTripDTO.getDays(), owedAmount));
+      userOwedAmounts.add(new UserTripDTO(user.getId(), trip.getId(), userTripDTO.getDays(), owedAmount, user.getUsername()));
     }
 
     return userOwedAmounts;
@@ -163,5 +169,9 @@ public class TripService {
               return expenseDTO;
             })
             .collect(Collectors.toList());
+  }
+
+  public boolean isUserInTrip(Long tripId, Long userId) {
+    return userTripRepository.existsByTripIdAndUserId(tripId, userId);
   }
 }

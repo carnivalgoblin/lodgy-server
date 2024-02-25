@@ -15,4 +15,6 @@ public interface UserTripRepository extends JpaRepository<UserTrip, Long> {
   List<UserTrip> findAllByUserId(Long userId);
 
   Optional<UserTrip> findByUserIdAndTripId(Long userId, Long tripId);
+
+  boolean existsByTripIdAndUserId(Long tripId, Long userId);
 }

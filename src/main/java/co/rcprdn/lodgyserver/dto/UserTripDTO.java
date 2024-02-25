@@ -23,9 +23,10 @@ public class UserTripDTO {
 
   private double owedAmount;
 
-  public UserTripDTO(Long userId, Long tripId, int days, double owedAmount) {
+  public UserTripDTO(Long userId, Long tripId, int days, double owedAmount, String username) {
     this.userId = userId;
     this.tripId = tripId;
+    this.username = username;
     this.days = days;
     this.owedAmount = owedAmount;
   }
