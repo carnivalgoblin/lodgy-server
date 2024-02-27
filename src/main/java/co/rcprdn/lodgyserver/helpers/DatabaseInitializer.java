@@ -65,12 +65,12 @@ public class DatabaseInitializer implements CommandLineRunner {
       e.printStackTrace();
     }
 
-    Expense expense1 = new Expense(1L, "Flight", 100.0, userRepository.findById(1L).orElse(null), tripRepository.findById(1L).orElse(null));
-    Expense expense2 = new Expense(2L, "Hotel", 200.0, userRepository.findById(2L).orElse(null), tripRepository.findById(1L).orElse(null));
-    Expense expense3 = new Expense(3L, "Food", 300.0, userRepository.findById(1L).orElse(null), tripRepository.findById(2L).orElse(null));
-    Expense expense4 = new Expense(4L, "Souvenirs", 400.0, userRepository.findById(2L).orElse(null), tripRepository.findById(2L).orElse(null));
-    Expense expense5 = new Expense(5L, "Flight", 500.0, userRepository.findById(1L).orElse(null), tripRepository.findById(3L).orElse(null));
-    Expense expense6 = new Expense(6L, "Hotel", 600.0, userRepository.findById(2L).orElse(null), tripRepository.findById(3L).orElse(null));
+    Expense expense1 = new Expense(null, "Flight", 100.0, userRepository.findById(1L).orElse(null), tripRepository.findById(1L).orElse(null));
+    Expense expense2 = new Expense(null, "Hotel", 200.0, userRepository.findById(2L).orElse(null), tripRepository.findById(1L).orElse(null));
+    Expense expense3 = new Expense(null, "Food", 300.0, userRepository.findById(1L).orElse(null), tripRepository.findById(2L).orElse(null));
+    Expense expense4 = new Expense(null, "Souvenirs", 400.0, userRepository.findById(2L).orElse(null), tripRepository.findById(2L).orElse(null));
+    Expense expense5 = new Expense(null, "Flight", 500.0, userRepository.findById(1L).orElse(null), tripRepository.findById(3L).orElse(null));
+    Expense expense6 = new Expense(null, "Hotel", 600.0, userRepository.findById(2L).orElse(null), tripRepository.findById(3L).orElse(null));
 
     expenseRepository.save(expense1);
     expenseRepository.save(expense2);
