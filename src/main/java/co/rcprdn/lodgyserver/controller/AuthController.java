@@ -12,6 +12,8 @@ import co.rcprdn.lodgyserver.repository.UserRepository;
 import co.rcprdn.lodgyserver.security.jwt.JwtUtils;
 import co.rcprdn.lodgyserver.security.services.UserDetailsImpl;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -48,6 +50,8 @@ public class AuthController {
     @Autowired
     JwtUtils jwtUtils;
 
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+
     @PostMapping("/signin")
     @PreAuthorize("permitAll()")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -64,6 +68,9 @@ public class AuthController {
                 .collect(Collectors.toList());
 
         ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
+        Long userId = userDetails.getId();
+        String username = userDetails.getUsername();
+        logger.info("User {} with ID {} logged in successfully.", username, userId);
 
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
                 .body(new UserInfoResponse(userDetails.getId(),
@@ -124,6 +131,11 @@ public class AuthController {
 
         user.setRoles(roles);
         userRepository.save(user);
+
+        Long userId = user.getId();
+        String username = user.getUsername();
+
+        logger.info("User {} with ID {} registered successfully.", username, userId);
 
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
