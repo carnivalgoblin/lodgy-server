@@ -24,11 +24,15 @@ public class ExpenseService {
     return expenseRepository.findById(id).orElseThrow(() -> new RuntimeException("Expense not found"));
   }
 
-  public void createExpense(Expense expense, Long tripId) {
+  public Expense createExpense(Expense expense, Long tripId) {
     Trip trip = tripRepository.findById(tripId).orElseThrow(() -> new RuntimeException("Trip not found with id: " + tripId));
     expense.setTrip(trip);
-    expenseRepository.save(expense);
+    Expense savedExpense = expenseRepository.save(expense);
+    Long savedExpenseId = savedExpense.getId();
+    Expense returnedExpense = expenseRepository.findById(savedExpenseId)
+            .orElseThrow(() -> new RuntimeException("Saved Expense not found after creation"));
 
+    return returnedExpense;
   }
 
   public Expense updateExpense(Expense expense) {

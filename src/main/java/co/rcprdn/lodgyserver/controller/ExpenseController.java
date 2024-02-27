@@ -83,16 +83,13 @@ public class ExpenseController {
   }
 
   @PostMapping("/create")
-  public ResponseEntity<String> addExpense(@RequestBody ExpenseDTO expenseDTO, @RequestParam Long tripId) {
-    // Perform any necessary validation or business logic
+  public ResponseEntity<ExpenseDTO> addExpense(@RequestBody ExpenseDTO expenseDTO, @RequestParam Long tripId) {
 
-    // Convert DTO to entity
     Expense expense = convertToEntity(expenseDTO);
+    Expense savedExpense = expenseService.createExpense(expense, tripId);
+    ExpenseDTO responseDTO = convertToDTO(savedExpense);
 
-    // Save the expense
-    expenseService.createExpense(expense, tripId);
-
-    return new ResponseEntity<>("Expense added successfully", HttpStatus.CREATED);
+    return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
   }
 
 //  @PostMapping("/create")
