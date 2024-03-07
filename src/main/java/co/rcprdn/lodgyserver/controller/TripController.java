@@ -7,6 +7,8 @@ import co.rcprdn.lodgyserver.entity.Expense;
 import co.rcprdn.lodgyserver.entity.Payment;
 import co.rcprdn.lodgyserver.entity.Trip;
 import co.rcprdn.lodgyserver.entity.UserTrip;
+import co.rcprdn.lodgyserver.exceptions.ResourceNotFoundException;
+import co.rcprdn.lodgyserver.exceptions.UserNotInTripException;
 import co.rcprdn.lodgyserver.security.services.UserDetailsImpl;
 import co.rcprdn.lodgyserver.service.*;
 import lombok.RequiredArgsConstructor;
@@ -105,7 +107,7 @@ public class TripController {
 //    }
   }
 
-  @PostMapping("/{tripId}/addUser/{userId}")
+  @PostMapping("/{tripId}/users/{userId}")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
   public ResponseEntity<TripDTO> addUserToTrip(@PathVariable("tripId") long tripId,
                                                @PathVariable("userId") long userId,
@@ -117,6 +119,21 @@ public class TripController {
       return new ResponseEntity<>(tripDTO, HttpStatus.OK);
     } else {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+  }
+
+
+  @DeleteMapping("/{tripId}/users/{userId}")
+  public ResponseEntity<?> removeUserFromTrip(@PathVariable("tripId") long tripId, @PathVariable("userId") long userId) {
+    try {
+      TripDTO updatedTrip = tripService.removeUserFromTrip(tripId, userId);
+      return ResponseEntity.ok(updatedTrip);
+    } catch (ResourceNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    } catch (UserNotInTripException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while removing the user from the trip.");
     }
   }
 

@@ -9,6 +9,7 @@ import co.rcprdn.lodgyserver.entity.User;
 import co.rcprdn.lodgyserver.entity.UserTrip;
 import co.rcprdn.lodgyserver.exceptions.ResourceNotFoundException;
 import co.rcprdn.lodgyserver.exceptions.UserAlreadyInTripException;
+import co.rcprdn.lodgyserver.exceptions.UserNotInTripException;
 import co.rcprdn.lodgyserver.repository.TripRepository;
 import co.rcprdn.lodgyserver.repository.UserRepository;
 import co.rcprdn.lodgyserver.repository.UserTripRepository;
@@ -95,6 +96,42 @@ public class TripService {
     return userTripDTOs.stream()
             .map(userTripDTO -> this.getTripDTOById(userTripDTO.getTripId()))
             .collect(Collectors.toList());
+  }
+
+  @Transactional
+  public TripDTO removeUserFromTrip(long tripId, long userId) {
+    Trip trip = tripRepository.findById(tripId)
+            .orElseThrow(() -> new ResourceNotFoundException("Trip not found with id: " + tripId));
+
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+
+    // Check if the user is associated with the trip
+    if (!trip.getUsers().contains(user)) {
+      // Handle the case where the user is not associated with the trip
+      // You might throw an exception, return a specific response, or handle it as needed
+      throw new UserNotInTripException("User is not in the trip.");
+    }
+
+    // Find the UserTrip entity associated with this user and trip
+    UserTrip userTripToRemove = null;
+    for (UserTrip userTrip : trip.getUserTrips()) {
+      if (userTrip.getUser().getId() == userId) {
+        userTripToRemove = userTrip;
+        break;
+      }
+    }
+
+    if (userTripToRemove != null) {
+      trip.getUserTrips().remove(userTripToRemove);
+      userTripToRemove.getTrip().getUsers().remove(user);
+      tripRepository.save(trip);
+      userRepository.save(user);
+      entityManager.remove(userTripToRemove);
+    }
+
+    // Assuming you have a method to convert Trip to TripDTO
+    return convertToDTO(trip);
   }
 
   public List<UserTripDTO> getOwedAmountsForTrip(Long tripId, List<UserTripDTO> userTripDTOs) {
