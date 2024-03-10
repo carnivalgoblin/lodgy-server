@@ -124,6 +124,21 @@ public class UserController {
     }
   }
 
+  @GetMapping("/current")
+  @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+  public ResponseEntity<UserDTO> getCurrentUser() {
+
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+    User user = userService.getUserById(userDetails
+            .getId());
+
+    UserDTO userDTO = convertUserToDTO(user);
+    return new ResponseEntity<>(userDTO, HttpStatus.OK);
+  }
+
 //  @GetMapping("/{userId}/trips")
 //  @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
 //  public List<Trip> getTripsByUserId(@PathVariable("userId") long userId) {
