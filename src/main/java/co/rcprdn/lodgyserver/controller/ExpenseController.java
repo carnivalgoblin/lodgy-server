@@ -34,7 +34,13 @@ public class ExpenseController {
     return new ResponseEntity<>(expenseDTOs, HttpStatus.OK);
   }
 
-
+  @GetMapping("/user/{userId}")
+  @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+  public ResponseEntity<List<ExpenseDTO>> getExpensesByUserId(@PathVariable Long userId) {
+    List<Expense> expenses = expenseService.getExpensesByUserId(userId);
+    List<ExpenseDTO> expenseDTOs = convertToDTOs(expenses);
+    return new ResponseEntity<>(expenseDTOs, HttpStatus.OK);
+  }
 
 
   @GetMapping("/{expenseId}")
@@ -80,6 +86,14 @@ public class ExpenseController {
     } else {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+  }
+
+  @GetMapping("/trip/{tripId}")
+  @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+  public ResponseEntity<List<ExpenseDTO>> getExpensesByTripIdByUserId(@PathVariable Long tripId, @RequestParam Long userId) {
+    List<Expense> expenses = expenseService.getExpensesByTripIdAndUserId(tripId, userId);
+    List<ExpenseDTO> expenseDTOs = convertToDTOs(expenses);
+    return new ResponseEntity<>(expenseDTOs, HttpStatus.OK);
   }
 
   @PostMapping("/create")
