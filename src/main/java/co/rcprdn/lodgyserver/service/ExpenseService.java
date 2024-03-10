@@ -46,4 +46,12 @@ public class ExpenseService {
   public List<Expense> getExpensesByTripId(Long tripId) {
     return expenseRepository.findAllByTripId(tripId);
   }
+
+  public List<Expense> getExpensesByTripIdAndUserId(Long tripId, Long userId) {
+    return expenseRepository.findAllByTripIdAndUserId(tripId, userId);
+  }
+
+  public List<Expense> getExpensesByUserId(Long userId) {
+    return expenseRepository.findAllByUserId(userId);
+  }
 }
