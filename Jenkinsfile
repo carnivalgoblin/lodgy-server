@@ -19,7 +19,7 @@ pipeline {
                 script {
                     checkout([$class: 'GitSCM',
                         branches: [[name: "*/${REPO_BRANCH}"]],
-                        userRemoteConfigs: [[url: "${REPO_URL}", credentialsId: 'carnivalgoblin']]
+                        userRemoteConfigs: [[url: "${REPO_URL}", credentialsId: 'gh']]
                     ])
                 }
             }
