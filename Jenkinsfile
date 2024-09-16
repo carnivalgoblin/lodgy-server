@@ -26,37 +26,38 @@ pipeline {
         }
 
         stage('Build Backend') {
-                    steps {
-                        script {
-                            sh './mvnw clean package'
-                        }
-                    }
-                }
-
-                stage('Build Docker Image') {
-                    steps {
-                        script {
-                            buildDockerImage("${DOCKER_REGISTRY}/${IMAGE_NAME}")
-                        }
-                    }
-                }
-
-                stage('Deploy Backend Stack') {
-                    steps {
-                        script {
-                            def apiKey = credentials('portainer-api-key')
-                            portainerLib.updateStack("${WORKSPACE}/${STACK_FILE_PATH}", STACK_NAME, PORTAINER_URL, apiKey, ENDPOINT_ID)
-                        }
-                    }
-                }
-            }
-
-            post {
-                success {
-                    echo 'Backend deployment was successful!'
-                }
-                failure {
-                    echo 'Backend deployment failed.'
+            steps {
+                script {
+                    sh 'chmod +x ./mvnw'  // Make the mvnw script executable
+                    sh './mvnw clean package'
                 }
             }
         }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    buildDockerImage("${DOCKER_REGISTRY}/${IMAGE_NAME}")
+                }
+            }
+        }
+
+        stage('Deploy Backend Stack') {
+            steps {
+                script {
+                    def apiKey = credentials('portainer-api-key')
+                    portainerLib.updateStack("${WORKSPACE}/${STACK_FILE_PATH}", STACK_NAME, PORTAINER_URL, apiKey, ENDPOINT_ID)
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Backend deployment was successful!'
+        }
+        failure {
+            echo 'Backend deployment failed.'
+        }
+    }
+}
