@@ -1,4 +1,4 @@
-@Library('pro_utils') _
+@Library('pro_utils')
 
 pipeline {
     agent any
