@@ -46,7 +46,7 @@ pipeline {
             steps {
                 script {
                     def apiKey = credentials('portainer-api-key')
-                    portainerLib.deployStack("${WORKSPACE}/${STACK_FILE_PATH}", STACK_NAME, PORTAINER_URL, apiKey, ENDPOINT_ID)
+                    deployStack("${WORKSPACE}/${STACK_FILE_PATH}", STACK_NAME, PORTAINER_URL, apiKey, ENDPOINT_ID)
                 }
             }
         }
