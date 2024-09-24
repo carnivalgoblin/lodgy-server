@@ -3,7 +3,6 @@ pipeline {
     environment {
         IMAGE_NAME = 'lodgy-server'
         DOCKER_REGISTRY = 'docker.local'
-        PORTAINER_URL = 'http://192.168.86.31:9000/api'
         STACK_NAME = 'lodgy'
         REPO_URL_BACKEND = 'git@github.com:carnivalgoblin/lodgy-server.git'
         REPO_URL_COMPOSE = 'git@github.com:carnivalgoblin/docker-compose.git'
@@ -77,7 +76,8 @@ pipeline {
             steps {
                 script {
                     def apiKey = credentials('portainer-api-key').toString()
-                    deployStack("${WORKSPACE}/lodgy.yml", STACK_NAME.toString(), PORTAINER_URL.toString(), apiKey, ENDPOINT_ID.toString())
+                    def portainer_url = credentials('portainer-url').toString()
+                    deployStack("${WORKSPACE}/lodgy.yml", STACK_NAME.toString(), portainer_url, apiKey, ENDPOINT_ID.toString())
                 }
             }
         }
