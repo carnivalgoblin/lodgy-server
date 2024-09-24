@@ -9,7 +9,7 @@ pipeline {
         STACK_NAME = 'lodgy'
         STACK_FILE_PATH = 'lodgy.yml'
         REPO_URL = 'git@github.com:carnivalgoblin/docker-compose.git'
-        REPO_BRANCH = 'master'
+        REPO_BRANCH = 'main'
         ENDPOINT_ID = '2'
     }
 
