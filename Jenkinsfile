@@ -77,7 +77,7 @@ pipeline {
                 script {
                     def apiKey = credentials('portainer-api-key').toString()
                     def portainer_url = credentials('portainer-url').toString()
-                    deployStack("${WORKSPACE}/lodgy.yml", STACK_NAME.toString(), portainer_url, apiKey, ENDPOINT_ID.toString())
+                    deployStack("${WORKSPACE}/lodgy.yml", STACK_NAME.toString(), "https://portainer.rcprdn.co/api", apiKey, ENDPOINT_ID.toString())
                 }
             }
         }
