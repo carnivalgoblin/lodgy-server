@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -41,8 +42,11 @@ public class DatabaseInitializer implements CommandLineRunner {
     userRepository.save(user);
   }
 
+  @Transactional
   @Override
   public void run(String... args) {
+
+    System.out.println("Running DatabaseInitializer...");
 
     for (ERole role : ERole.values()) {
       roleRepository.save(new Role(role));
