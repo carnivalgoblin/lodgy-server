@@ -45,8 +45,8 @@ pipeline {
         stage('Deploy Backend Stack') {
             steps {
                 script {
-                    def apiKey = credentials('portainer-api-key')
-                    deployStack("${WORKSPACE}/${STACK_FILE_PATH}", STACK_NAME, PORTAINER_URL, apiKey, ENDPOINT_ID)
+                    def apiKey = credentials('portainer-api-key').toString() // Ensure apiKey is a string
+                    deployStack("${WORKSPACE}/${STACK_FILE_PATH}", STACK_NAME.toString(), PORTAINER_URL.toString(), apiKey, ENDPOINT_ID.toString()) // Convert all to string
                 }
             }
         }
