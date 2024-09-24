@@ -1,5 +1,5 @@
 # Dockerfile for Spring Boot Backend
-FROM openjdk:17-jdk-alpine
+FROM openjdk:21-jdk-slim
 VOLUME /tmp
 COPY target/*.jar app.jar
 ENTRYPOINT ["java","-jar","/app.jar"]
