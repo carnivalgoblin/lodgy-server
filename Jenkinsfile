@@ -25,6 +25,15 @@ pipeline {
             }
         }
 
+        stage('Check Files') {
+            steps {
+                script {
+                    sh 'pwd'
+                    sh 'ls -la'
+                }
+            }
+        }
+
         stage('Build Backend') {
             steps {
                 script {
