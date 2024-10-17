@@ -2,7 +2,7 @@ version: '3'
 services:
 
   lodgy-db:
-    image: postgres:latest
+    image: postgres:16
     container_name: lodgy-db
     environment:
       POSTGRES_USER: postgres
