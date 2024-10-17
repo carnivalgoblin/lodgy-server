@@ -53,6 +53,11 @@ public class DatabaseInitializer implements CommandLineRunner {
 
     System.out.println("Running DatabaseInitializer...");
 
+    if (isDatabaseAlreadyInitialized()) {
+      System.out.println("Database is already initialized. Skipping initialization.");
+      return;
+    }
+
     for (ERole role : ERole.values()) {
       roleRepository.save(new Role(role));
     }
@@ -124,5 +129,9 @@ public class DatabaseInitializer implements CommandLineRunner {
       }
     }
     return false;
+  }
+
+  private boolean isDatabaseAlreadyInitialized() {
+    return userRepository.existsByUsername(env.getProperty("USER1_NAME")); // Check if admin user exists
   }
 }
