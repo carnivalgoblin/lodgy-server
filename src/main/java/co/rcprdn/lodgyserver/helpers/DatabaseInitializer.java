@@ -66,9 +66,9 @@ public class DatabaseInitializer implements CommandLineRunner {
 
       System.out.println("Prod mode...");
 
-      createUserWithRoles(env.getProperty("USER1_NAME"), env.getProperty("USER1_EMAIL"), env.getProperty("USER1_PASSWORD"), ERole.valueOf(env.getProperty("USER1_ROLES")));
-      createUserWithRoles(env.getProperty("USER2_NAME"), env.getProperty("USER2_EMAIL"), env.getProperty("USER2_PASSWORD"), ERole.valueOf(env.getProperty("USER2_ROLES")));
-      createUserWithRoles(env.getProperty("USER3_NAME"), env.getProperty("USER3_EMAIL"), env.getProperty("USER3_PASSWORD"), ERole.valueOf(env.getProperty("USER3_ROLES")));
+      createUserWithRoles(env.getProperty("USER1_NAME"), env.getProperty("USER1_EMAIL"), env.getProperty("USER1_PASSWORD"), parseRoles(env.getProperty("USER1_ROLES")));
+      createUserWithRoles(env.getProperty("USER2_NAME"), env.getProperty("USER2_EMAIL"), env.getProperty("USER2_PASSWORD"), parseRoles(env.getProperty("USER2_ROLES")));
+      createUserWithRoles(env.getProperty("USER3_NAME"), env.getProperty("USER3_EMAIL"), env.getProperty("USER3_PASSWORD"), parseRoles(env.getProperty("USER3_ROLES")));
 
     } else {
 
@@ -133,5 +133,12 @@ public class DatabaseInitializer implements CommandLineRunner {
 
   private boolean isDatabaseAlreadyInitialized() {
     return userRepository.existsByUsername(env.getProperty("USER1_NAME")); // Check if admin user exists
+  }
+
+  private ERole[] parseRoles(String rolesString) {
+    return Arrays.stream(rolesString.split(","))
+            .map(String::trim)
+            .map(ERole::valueOf)
+            .toArray(ERole[]::new);
   }
 }
