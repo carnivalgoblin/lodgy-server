@@ -5,9 +5,9 @@ services:
     image: postgres:16
     container_name: lodgy-db
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: pg78hhu00B078
-      POSTGRES_DB: lodgy_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=pg78hhu00B078
+      - POSTGRES_DB=lodgy_db
     ports:
       - 5432:5432
     volumes:
