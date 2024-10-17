@@ -61,9 +61,9 @@ public class DatabaseInitializer implements CommandLineRunner {
 
       System.out.println("Prod mode...");
 
-      createUserWithRoles(env.getProperty("USER1_NAME"), env.getProperty("USER1_PASSWORD"), env.getProperty("USER1_ROLES"));
-      createUserWithRoles(env.getProperty("USER2_NAME"), env.getProperty("USER2_PASSWORD"), env.getProperty("USER2_ROLES"));
-      createUserWithRoles(env.getProperty("USER3_NAME"), env.getProperty("USER3_PASSWORD"), env.getProperty("USER3_ROLES"));
+      createUserWithRoles(env.getProperty("USER1_NAME"), env.getProperty("USER1_EMAIL"), env.getProperty("USER1_PASSWORD"), ERole.valueOf(env.getProperty("USER1_ROLES")));
+      createUserWithRoles(env.getProperty("USER2_NAME"), env.getProperty("USER2_EMAIL"), env.getProperty("USER2_PASSWORD"), ERole.valueOf(env.getProperty("USER2_ROLES")));
+      createUserWithRoles(env.getProperty("USER3_NAME"), env.getProperty("USER3_EMAIL"), env.getProperty("USER3_PASSWORD"), ERole.valueOf(env.getProperty("USER3_ROLES")));
 
     } else {
 
