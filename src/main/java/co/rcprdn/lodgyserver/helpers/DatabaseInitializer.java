@@ -37,6 +37,7 @@ public class DatabaseInitializer implements CommandLineRunner {
     user.setUsername(username);
     user.setEmail(email);
     user.setPassword(encoder.encode(password));
+    user.setEnabled(true);
 
     Set<Role> userRoles = new HashSet<>();
     for (ERole role : roles) {

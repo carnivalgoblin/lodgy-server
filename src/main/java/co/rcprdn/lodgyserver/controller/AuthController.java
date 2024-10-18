@@ -15,7 +15,9 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -51,6 +53,9 @@ public class AuthController {
     @Autowired
     JwtUtils jwtUtils;
 
+    @Value("${user.approval.required:false}") // Default to false if not set
+    private boolean userApprovalRequired;
+
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     @PostMapping("/signin")
@@ -73,6 +78,10 @@ public class AuthController {
         String username = userDetails.getUsername();
         logger.info("User {} with ID {} logged in successfully.", username, userId);
 
+        if (userApprovalRequired && !userDetails.isEnabled()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Error: User is not approved. Please contact an administrator.");
+        }
+
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
                 .body(new UserInfoResponse(userDetails.getId(),
                         userDetails.getUsername(),
@@ -92,14 +101,13 @@ public class AuthController {
         // Create new user's account
         User user = new User(signUpRequest.getUsername(),
                 encoder.encode(signUpRequest.getPassword()));
-
         Set<Role> roles = new HashSet<>();
-
         Role userRole = roleRepository.findByName(ERole.ROLE_USER)
                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
         roles.add(userRole);
-
         user.setRoles(roles);
+        user.setEnabled(false);
+
         userRepository.save(user);
 
         Long userId = user.getId();
@@ -107,13 +115,17 @@ public class AuthController {
 
         logger.info("User {} with ID {} registered successfully.", username, userId);
 
-        // Create a LoginRequest to authenticate the newly created user
-        LoginRequest loginRequest = new LoginRequest();
-        loginRequest.setUsername(signUpRequest.getUsername());
-        loginRequest.setPassword(signUpRequest.getPassword());
+        if (userApprovalRequired) {// Create a LoginRequest to authenticate the newly created user
+            LoginRequest loginRequest = new LoginRequest();
+            loginRequest.setUsername(signUpRequest.getUsername());
+            loginRequest.setPassword(signUpRequest.getPassword());
 
-        // Call the authenticateUser method to log the user in
-        return authenticateUser(loginRequest);
+
+            // Call the authenticateUser method to log the user in
+            return authenticateUser(loginRequest);
+        } else {
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(new MessageResponse("User is approved."));
+        }
     }
 
     @PostMapping("/signout")
