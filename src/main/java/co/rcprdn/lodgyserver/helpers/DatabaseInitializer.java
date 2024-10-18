@@ -72,6 +72,8 @@ public class DatabaseInitializer implements CommandLineRunner {
 
     } else {
 
+      System.out.println("Dev mode...");
+
       createUserWithRoles("rico", "rico.prodan@mail.com", "12345678", ROLE_ADMIN, ROLE_MODERATOR, ROLE_USER);
       createUserWithRoles("mod", "mod@mail.com", "12345678", ROLE_MODERATOR, ROLE_USER);
       createUserWithRoles("test", "test@mail.com", "12345678", ROLE_USER);
