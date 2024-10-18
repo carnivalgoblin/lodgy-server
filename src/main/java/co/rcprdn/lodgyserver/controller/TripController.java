@@ -9,6 +9,7 @@ import co.rcprdn.lodgyserver.entity.Trip;
 import co.rcprdn.lodgyserver.entity.UserTrip;
 import co.rcprdn.lodgyserver.exceptions.ResourceNotFoundException;
 import co.rcprdn.lodgyserver.exceptions.UserNotInTripException;
+import co.rcprdn.lodgyserver.repository.TripRepository;
 import co.rcprdn.lodgyserver.security.services.UserDetailsImpl;
 import co.rcprdn.lodgyserver.service.*;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static co.rcprdn.lodgyserver.service.TripService.getTripDTO;
@@ -38,6 +40,7 @@ public class TripController {
   private final CostDistributionService costDistributionService;
   private final PaymentCalculatorService paymentCalculatorService;
   private final ExpenseService expenseService;
+  private final TripRepository tripRepository;
 
   @GetMapping("/all")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
@@ -156,33 +159,36 @@ public class TripController {
     }
   }
 
-//  @PutMapping("/update/{tripId}")
-//  @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-//  public ResponseEntity<Trip> updateTrip(@PathVariable("tripId") long tripId, @RequestBody Trip trip) {
-//
-//    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//
-//    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-//
-//    Trip existingTrip = tripService.getTripById(tripId);
-//
-//    UserTripExpense userTripExpense = userTripExpenseService.getUserTripExpenseByTripId(tripId);
-//
-//    return ResponseEntity.ok(userTripExpense.getTrip());
+  @PutMapping("/update/{id}")
+  public Trip updateTrip(@PathVariable("id") Long id, @RequestBody Trip updatedTrip) {
+    // Retrieve the existing trip from the database
+    Optional<Trip> optionalExistingTrip = tripRepository.findById(id);
+    if (optionalExistingTrip.isPresent()) {
+      Trip existingTrip = optionalExistingTrip.get();
 
-//    if (hasUserRole("MODERATOR", authentication) || hasUserRole("ADMIN", authentication)) {
-//      return getTripResponseEntity(trip, numberOfNights, existingTrip);
-//
-//    } else if (hasUserRole("USER", authentication)) {
-//      if (trip.getUsers().contains(userDetails.getUser())) {
-//        return getTripResponseEntity(trip, numberOfNights, existingTrip);
-//      } else {
-//        throw new AccessDeniedException("You are not authorized to update this resource.");
-//      }
-//    } else {
-//      throw new AccessDeniedException("You are not authorized to access this resource.");
-//    }
-//  }
+      // Update fields if they are present in the updatedTrip object
+      if (updatedTrip.getDestination() != null) {
+        existingTrip.setDestination(updatedTrip.getDestination());
+      }
+
+      if (updatedTrip.getStartDate() != null) {
+        existingTrip.setStartDate(updatedTrip.getStartDate());
+      }
+
+      if (updatedTrip.getEndDate() != null) {
+        existingTrip.setEndDate(updatedTrip.getEndDate());
+      }
+
+      if (updatedTrip.getDescription() != null) {
+        existingTrip.setDescription(updatedTrip.getDescription());
+      }
+
+      // Save the updated trip back to the database
+      return tripRepository.save(existingTrip);
+    } else {
+      throw new ResourceNotFoundException("Trip not found with ID: " + id);
+    }
+  }
 
   @GetMapping("/userTrip/{id}")
   public ResponseEntity<UserTripDTO> getUserTrip(@PathVariable Long id) {
