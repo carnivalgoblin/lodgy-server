@@ -139,7 +139,9 @@ public class ExpenseController {
 
     UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-    return null;
+    expenseService.deleteExpense(id);
+
+    return new ResponseEntity<>(HttpStatus.OK);
 
 //    if (hasUserRole("MODERATOR", authentication) || hasUserRole("ADMIN", authentication)) {
 //      expenseService.deleteExpense(id);
