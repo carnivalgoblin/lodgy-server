@@ -2,11 +2,10 @@ package co.rcprdn.lodgyserver.controller;
 
 import co.rcprdn.lodgyserver.dto.SimpleUserDTO;
 import co.rcprdn.lodgyserver.dto.UserDTO;
-import co.rcprdn.lodgyserver.entity.Expense;
-import co.rcprdn.lodgyserver.entity.Trip;
-import co.rcprdn.lodgyserver.entity.User;
-import co.rcprdn.lodgyserver.entity.UserTrip;
+import co.rcprdn.lodgyserver.entity.*;
+import co.rcprdn.lodgyserver.enums.ERole;
 import co.rcprdn.lodgyserver.exceptions.ResourceNotFoundException;
+import co.rcprdn.lodgyserver.repository.RoleRepository;
 import co.rcprdn.lodgyserver.security.services.UserDetailsImpl;
 import co.rcprdn.lodgyserver.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +17,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 public class UserController {
 
   public final UserService userService;
+  public final RoleRepository roleRepository;
 
   @GetMapping("/all")
   @PreAuthorize("hasRole('MODERATOR') or hasRole('ADMIN')")
@@ -78,29 +80,25 @@ public class UserController {
     }
   }
 
-  @PostMapping("/update")
+  @PutMapping("/update")
   @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
-  public User updateUser(@RequestBody User user) {
+  public ResponseEntity<UserDTO> updateUser(@RequestBody User user) {
 
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    // Fetch the existing user from the database
+    User existingUser = userService.getUserById(user.getId());
 
-    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+    // Update only the fields you want to allow
+    existingUser.setUsername(user.getUsername()); // Allow username update
+    existingUser.setEnabled(user.isEnabled()); // Allow enabled update
 
-    if (hasUserRole("ADMIN", authentication)) {
-      return userService.updateUser(user);
-    } else if (hasUserRole("MODERATOR", authentication)) {
-      user.setRoles(userService.getUserById(user.getId()).getRoles());
-      return userService.updateUser(user);
-    } else if (hasUserRole("USER", authentication)) {
-      if (userDetails.getId().equals(user.getId())) {
-        user.setRoles(userService.getUserById(user.getId()).getRoles());
-        return userService.updateUser(user);
-      } else {
-        throw new AccessDeniedException("You are not authorized to access this resource.");
-      }
-    } else {
-      throw new ResourceNotFoundException("Resource not found.");
-    }
+    // Save the updated user
+    User updatedUser = userService.updateUser(existingUser);
+
+    // Log the updated user for debugging
+    System.out.println("Updated user: " + updatedUser);
+
+    UserDTO userDTO = convertUserToDTO(updatedUser);
+    return new ResponseEntity<>(userDTO, HttpStatus.OK);
   }
 
   @DeleteMapping("/{userId}")
@@ -183,6 +181,41 @@ public class UserController {
 //    }
 //  }
 
+  @PutMapping("/{userId}")
+  @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+  public ResponseEntity<UserDTO> updateUser(@PathVariable("userId") Long userId, @RequestBody UserDTO userDTO) {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+    // Check if the user has permission to update the user
+    if (hasUserRole("ADMIN", authentication) || hasUserRole("MODERATOR", authentication) || userDetails.getId().equals(userId)) {
+      // Get the existing user from the database
+      User user = userService.getUserById(userId);
+
+      // Update user fields based on incoming UserDTO
+      user.setUsername(userDTO.getUsername());
+      user.setEnabled(userDTO.getEnabled());
+
+      // If Admin, also allow updating roles
+      if (hasUserRole("ADMIN", authentication)) {
+        Set<Role> roles = userDTO.getUserRoles().stream()
+                .map(userService::getRoleByERole)
+                .collect(Collectors.toSet());
+        user.setRoles(roles);
+      }
+
+      // Save the updated user
+      User updatedUser = userService.updateUser(user);
+
+      // Convert the updated user back to a DTO and return
+      UserDTO updatedUserDTO = convertUserToDTO(updatedUser);
+      return new ResponseEntity<>(updatedUserDTO, HttpStatus.OK);
+    } else {
+      throw new AccessDeniedException("You are not authorized to update this user.");
+    }
+  }
+
+
 
   private boolean hasUserRole(String roleName, Authentication authentication) {
     return authentication.getAuthorities().stream()
@@ -197,6 +230,10 @@ public class UserController {
     userDTO.setExpenseIds(user.getExpenses().stream().map(Expense::getId).collect(Collectors.toList()));
     userDTO.setTripIds(user.getTrips().stream().map(Trip::getId).collect(Collectors.toList()));
     userDTO.setUserTrips(user.getUserTrips().stream().map(UserTrip::getId).collect(Collectors.toList()));
+    userDTO.setUserRoles(user.getRoles().stream()
+            .map(Role::getName)
+            .collect(Collectors.toList()));
+    userDTO.setEnabled(user.isEnabled());
 
     return userDTO;
   }
