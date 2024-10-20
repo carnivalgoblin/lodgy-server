@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -80,16 +81,15 @@ public class DatabaseInitializer implements CommandLineRunner {
       createUserWithRoles("mod", "mod@mail.com", "12345678", ROLE_MODERATOR, ROLE_USER);
       createUserWithRoles("test", "test@mail.com", "12345678", ROLE_USER);
 
-      SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 
       try {
-        tripRepository.save(new Trip(null, "Amsterdam", formatter.parse("2021-05-01"), formatter.parse("2021-05-10"), "A beautiful city known for its canals and historic architecture.", new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
-        tripRepository.save(new Trip(null, "Berlin", formatter.parse("2021-06-01"), formatter.parse("2021-06-10"), "The capital and largest city of Germany, famous for its rich history.", new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
-        tripRepository.save(new Trip(null, "Paris", formatter.parse("2021-07-01"), formatter.parse("2021-07-10"), "The City of Love, known for its art, fashion, and culture.", new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
-        tripRepository.save(new Trip(null, "London", formatter.parse("2023-12-01"), formatter.parse("2023-12-31"), "The capital of the United Kingdom, a global city with a diverse history.", new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
-        tripRepository.save(new Trip(null, "Rome", formatter.parse("2024-01-01"), formatter.parse("2024-12-10"), "The Eternal City, known for its ancient history and architecture.", new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
-        tripRepository.save(new Trip(null, "Madrid", formatter.parse("2025-02-01"), formatter.parse("2025-02-10"), "The capital and largest city of Spain, famous for its lively atmosphere.", new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
-      } catch (ParseException e) {
+        tripRepository.save(new Trip(null, "Amsterdam", LocalDate.parse("2021-05-01"), LocalDate.parse("2021-05-10"), "A beautiful city known for its canals and historic architecture.", new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
+        tripRepository.save(new Trip(null, "Berlin", LocalDate.parse("2021-06-01"), LocalDate.parse("2021-06-10"), "The capital and largest city of Germany, famous for its rich history.", new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
+        tripRepository.save(new Trip(null, "Paris", LocalDate.parse("2021-07-01"), LocalDate.parse("2021-07-10"), "The City of Love, known for its art, fashion, and culture.", new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
+        tripRepository.save(new Trip(null, "London", LocalDate.parse("2023-12-01"), LocalDate.parse("2023-12-31"), "The capital of the United Kingdom, a global city with a diverse history.", new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
+        tripRepository.save(new Trip(null, "Rome", LocalDate.parse("2024-01-01"), LocalDate.parse("2024-12-10"), "The Eternal City, known for its ancient history and architecture.", new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
+        tripRepository.save(new Trip(null, "Madrid", LocalDate.parse("2025-02-01"), LocalDate.parse("2025-02-10"), "The capital and largest city of Spain, famous for its lively atmosphere.", new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
+      } catch (Exception e) {
         e.printStackTrace();
       }
 
