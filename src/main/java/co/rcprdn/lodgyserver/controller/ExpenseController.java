@@ -14,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -81,7 +82,7 @@ public class ExpenseController {
 
     if (!expenses.isEmpty()) {
       double totalAmount = expenses.stream().mapToDouble(Expense::getAmount).sum();
-      ExpenseDTO tripExpenseDTO = new ExpenseDTO(null, null, tripId, totalAmount, null);
+      ExpenseDTO tripExpenseDTO = new ExpenseDTO(null, null, tripId, totalAmount, null, LocalDateTime.now());
       return new ResponseEntity<>(tripExpenseDTO, HttpStatus.OK);
     } else {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -193,6 +194,7 @@ public class ExpenseController {
       expenseDTO.setUserId(expense.getUser().getId());
       expenseDTO.setAmount(expense.getAmount());
       expenseDTO.setDescription(expense.getDescription());
+      expenseDTO.setCreatedAt(expense.getCreatedAt());
 
       expenseDTOs.add(expenseDTO);
     }
@@ -207,6 +209,7 @@ public class ExpenseController {
     expenseDTO.setUserId(expense.getUser().getId());
     expenseDTO.setAmount(expense.getAmount());
     expenseDTO.setDescription(expense.getDescription());
+    expenseDTO.setCreatedAt(expense.getCreatedAt());
 
     return expenseDTO;
   }
@@ -218,6 +221,7 @@ public class ExpenseController {
     expense.setTripId(expenseDTO.getTripId(), tripRepository);
     expense.setAmount(expenseDTO.getAmount());
     expense.setDescription(expenseDTO.getDescription());
+    expense.setCreatedAt(expenseDTO.getCreatedAt());
 
     return expense;
   }

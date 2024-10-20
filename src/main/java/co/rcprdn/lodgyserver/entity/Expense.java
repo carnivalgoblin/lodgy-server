@@ -8,7 +8,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @AllArgsConstructor
@@ -34,6 +36,23 @@ public class Expense {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "trip_id")
   private Trip trip;
+
+  @CreationTimestamp
+  @Column(updatable = false)
+  private LocalDateTime createdAt;
+
+  public Expense(Long id, String destination, Double amount, User user, Trip trip) {
+    this.id = id;
+    this.description = destination;
+    this.amount = amount;
+    this.user = user;
+    this.trip = trip;
+  }
+
+  @PrePersist
+  protected void onCreate() {
+    this.createdAt = LocalDateTime.now();
+  }
 
   public void setUserId(Long userId, UserRepository userRepository) {
     // Check if the user with the given ID exists
