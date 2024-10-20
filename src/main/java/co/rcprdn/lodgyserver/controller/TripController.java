@@ -22,6 +22,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -87,6 +88,9 @@ public class TripController {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
     UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+    trip.setStartDate(LocalDate.from(trip.getStartDate().atStartOfDay()));
+    trip.setEndDate(LocalDate.from(trip.getEndDate().atStartOfDay()));
 
     Trip createdTrip = tripService.createTrip(trip);
 
